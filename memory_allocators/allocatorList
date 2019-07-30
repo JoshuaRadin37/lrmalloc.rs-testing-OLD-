@@ -1,0 +1,6 @@
+Memory Allocators to Consider:
+tcmalloc !
+ptmalloc !
+jemalloc ! 
+SuperMalloc !
+Hoard !
