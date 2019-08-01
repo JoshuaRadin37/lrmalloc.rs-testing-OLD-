@@ -7,7 +7,7 @@ all: larson larson-hoard larson-jemalloc
 TARGET = larson larson-hoard larson-jemalloc
 
 larson: larson.cpp
-	$(CXX) $(CXXFLAGS) larson.cpp -o larson -lpthread
+	($(CXX) $(CXXFLAGS) larson.cpp -o larson -lpthread)
 
 larson-hoard: larson.cpp
 	$(CXX) $(CXXFLAGS) larson.cpp -L$(MEMPATH)/Hoard/src -Wl,-rpath=$(MEMPATH)/Hoard/src -lhoard -o larson-hoard -lpthread
