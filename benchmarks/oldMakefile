@@ -1,0 +1,31 @@
+include ../Makefile.inc
+
+all: larson larson-hoard larson-jemalloc t-test1 t-test2 larson-ralloc
+
+TARGET = larson larson-hoard larson-jemalloc t-test1 t-test2 larson-ralloc
+
+larson: larson.cpp
+	        $(CXX) $(CXXFLAGS) larson.cpp -o larson -lpthread
+
+larson-hoard: larson.cpp
+	        $(CXX) $(CXXFLAGS) larson.cpp -L/u/selsaid/Hoard/src -Wl,-rpath=/u/selsaid/Hoard/src -lhoard -o larson-hoard -lpthread
+
+
+larson-jemalloc: larson.cpp
+	        $(CXX) $(CXXFLAGS) larson.cpp -L/u/selsaid/jemalloc/usr/local/lib -Wl,-rpath=/u/selsaid/jemalloc/usr/local/lib -ljemalloc -o larson-jemalloc -lpthread
+
+larson-super: larson.cpp
+	       $(CXX) $(CXXFLAGS) larson.cpp -L/u/selsaid/SuperMalloc/release/lib -Wl,-rpath=/u/selsaid/SuperMalloc/release/lib -lsupermalloc -o larson-super -lpthread
+
+larson-ralloc: larson.cpp
+	        $(CXX) $(CXXFLAGS) larson.cpp -L/u/selsaid/ralloc/target/debug -Wl,-rpath=/u/selsaid/ralloc/target/debug -I. -lralloc -o larson-ralloc -lpthread
+
+
+t-test1: t-test1.c
+	        	$(CC) $(CCFLAGS) t-test1.c -o t-test1 -lpthread
+
+t-test2: t-test2.c
+			$(CC) $(CCFLAGS) t-test2.c -o t-test2 -lpthread
+clean:
+	rm -f $(TARGET)
+
