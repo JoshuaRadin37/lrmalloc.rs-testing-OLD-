@@ -1,0 +1,18 @@
+-test names marked with --X are working correctly
+
+larson-hoard --X
+t-test1-hoard -- X
+t-test2-hoard -- X
+threadtest-hoard --X
+larson-ptmalloc --X
+t-test1-ptmalloc --X
+t-test2-ptmalloc --X
+threadtest-ptmalloc --X
+larson-jemalloc --X
+t-test1-jemalloc -- X
+t-test2-jemalloc -- X
+threadtest-jemalloc --X
+larson-tcmalloc --X
+t-test1-tcmalloc --X
+t-test2-tcmalloc --X
+threadtest-tcmalloc --X

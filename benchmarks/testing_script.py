@@ -2,8 +2,8 @@
 import os
 import sys
 #global variables
-allowed_allocators = ['Hoard','jemalloc','tcmalloc','ptmalloc', 'dlmalloc', 'ralloc']
-allowed_tests = ['larson', 'cache-scratch', 't-test1', 't-test2']
+allowed_allocators = ['hoard','jemalloc','tcmalloc','ptmalloc', 'dlmalloc', 'ralloc']
+allowed_tests = ['larson', 'threadtest', 't-test1', 't-test2']
 #this function cleans all the testing executables and remakes everything.
 def make_start():
         
@@ -19,26 +19,27 @@ def testing_routine():
     required_allocators = allowed_allocators
 
     #check the size of sys.argv
-    if( len(sys.argv) == 1 ):
+    if(len(sys.argv) == 1):
         #we have no specified allocator nor test, run all allocators on all tests
-        print("running all allocators with all tests with default arguments");
-    elif ( '-help' in (sys.argv)):
+        print("running all allocators with all tests with default arguments")
+    
+    if( '-help' in (sys.argv)):
         print("Long helpful message")
-    elif ( '-t' in (sys.argv)):
-        #we update the testing variable
-        required_testing = verify_tests()
-    elif ( '-a'  in (sys.argv)):
-        print("You have chosen an allocator")
-    else :
-        print("no such option {} ".format(sys.argv[1]))
+    else:
+            if ( '-t' in (sys.argv)):
+                #we update the testing list
+                required_testing = verify_tests()
+            if ( '-a'  in (sys.argv)):
+                #we update the allocators list
+                required_allocators = verify_allocators()
 
+            run_tests(required_testing, required_allocators)
 #here we check what tests the user chose if the user used '-t' option
 def verify_tests():
 
         #we compile a testing array and return it, if an error occurs we exit.
         tests = []
         tIndex = sys.argv.index('-t') + 1
-        print(tIndex)
         for i in (sys.argv[tIndex:]):
             if (i == '-a'):
                 break
@@ -46,7 +47,6 @@ def verify_tests():
                 raise Exception('{} is not an allowed test'.format(i))
                 break
             tests.append(i)
-        print(tests)
         if (len(tests) == 0):
             print("No tests were chosen, running with all tests")
             return allowed_tests
@@ -62,13 +62,26 @@ def verify_allocators():
         for i in (sys.argv[aIndex:]):
             if (i == '-t'):
                 break
-            if (i not in allowed_allocator):
+            if (i not in allowed_allocators):
                 raise Exception('{} is not an allowed allocator'.format(i))
                 break
             allocators.append(i)
-        print(allocators)
         if (len(allocators) == 0):
             print("No allocators were chosen, running with all all allocators")
             return allowed_allocators
-        return tests
+        return allocators
+#this function runs some tests on some allocators, currently does not support varied parameters
+#currently only supports allocators = [hoard] and tests = [larson]
+def run_tests(tests, allocators):
+
+    #for each allocator, run tests
+    #dictionary between tests and their locations
+    test_dirs = {
+                'larson-hoard':'cd larson; ./larson-hoard 1 1 1 1 1 1 1'
+            }
+    for alloc in allocators:
+        for test in tests:
+            test_key = test + "-" + alloc
+            print(test_key)
+           # os.system(test_dirs.get(test_key))
 testing_routine()
