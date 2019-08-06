@@ -1,6 +1,6 @@
 # ralloc-testing
 Contains the testing scripts for the APF based memory allocator "ralloc"
-#main testing script
+# main testing script
 The main testing script for this project is testing_script.py
 This script runs permutations of synthetic test executables on different malloc libraries 
 There are three options, '-help' which displays a manual on how to use this tool.
