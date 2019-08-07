@@ -20,6 +20,8 @@ threadtest-ptmalloc: threadtest.cpp
 threadtest-jemalloc: threadtest.cpp
 	$(CXX) -std=c++14 $(CXXFLAGS) threadtest.cpp -L$(MEMPATH)/jemalloc/lib -Wl,-rpath=$(MEMPATH)/jemalloc/lib -ljemalloc -o threadtest-jemalloc -lpthread
 
+threadtest-super: threadtest.cpp
+	$(CXX) -std=c++14 $(CXXFLAGS) threadtest.cpp -L$(MEMPATH)/SuperMalloc/release/lib -Wl,-rpath=$(MEMPATH)/SuperMalloc/release/lib -lsupermalloc -o threadtest-super -lpthread
 threadtest: threadtest.cpp
 	$(CXX) -std=c++14 $(CXXFLAGS) threadtest.cpp -o threadtest -lpthread
 #	$(CXX) -std=c++14 $(CXXFLAGS) -fsized-deallocation threadtest.cpp -o $(TARGET) -lpthread

@@ -16,3 +16,12 @@ larson-tcmalloc --X
 t-test1-tcmalloc --X
 t-test2-tcmalloc --X
 threadtest-tcmalloc --X
+server-super --X
+server-hoard --X
+server-tcmalloc --X
+server-jemalloc --X
+server-ptmalloc --X
+larson-super --X
+t-test1-super --X
+t-test2-super --X
+threadtest-super --X

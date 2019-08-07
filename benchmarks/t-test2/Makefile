@@ -1,8 +1,8 @@
 include ../Makefile.inc
 
-all : t-test2-ptmalloc3 t-test2-hoard t-test2-tcmalloc t-test2-jemalloc
+all : t-test2-ptmalloc3 t-test2-hoard t-test2-tcmalloc t-test2-jemalloc t-test2-super
 
-TARGET = t-test2-ptmalloc3 t-test2-hoard t-test2-tcmalloc t-test2-jemalloc
+TARGET = t-test2-ptmalloc3 t-test2-hoard t-test2-tcmalloc t-test2-jemalloc t-test2-super
 
 MEMPATH = ../../memory_allocators/
 
@@ -19,5 +19,8 @@ t-test2-tcmalloc: t-test2.c
 
 t-test2-jemalloc: t-test2.c
 	$(CC) $(CCFLAGS) t-test2.c -L$(MEMPATH)/jemalloc/lib -Wl,-rpath=$(MEMPATH)/jemalloc/lib -ljemalloc -o t-test2-jemalloc -lpthread
+
+t-test2-super: t-test2.c
+	$(CC) $(CCFLAGS) t-test2.c -L$(MEMPATH)/SuperMalloc/release/lib -Wl,-rpath=$(MEMPATH)/SuperMalloc/release/lib -lsupermalloc -o t-test2-super -lpthread
 clean:
 	rm -f $(TARGET)
