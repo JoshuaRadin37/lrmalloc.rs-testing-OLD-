@@ -21,5 +21,12 @@ t-test1
 t-test2
 larson
 threadtest
+# to build
 
+To build the tests you can either run testing_script.py with the preferred arguments as mentioned above, or
+
+cd benchmarks
+make
+
+This will make all the tests included in this package and you can run these tests individually
 
