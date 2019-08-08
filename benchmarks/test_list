@@ -25,3 +25,8 @@ larson-super --X
 t-test1-super --X
 t-test2-super --X
 threadtest-super --X
+shbench-hoard --X
+shbench-ptmalloc --X
+shbench-jemalloc --X
+shbench-tcmalloc --X
+shbench-super --X
