@@ -1,4 +1,179 @@
 sleep = 10, min = 7, max = 8, per thread = 1000, num rounds = 10000, seed = 1, max_threads = 1, min_threads = 1
-Throughput = 24998276 operations per second.
+Throughput = 24923723 operations per second.
+thread stopping.
+Done sleeping...
+sleep = 10, min = 7, max = 8, per thread = 1000, num rounds = 10000, seed = 1, max_threads = 2, min_threads = 2
+thread stopping.
+Throughput = 42879902 operations per second.
+thread stopping.
+Done sleeping...
+sleep = 10, min = 7, max = 8, per thread = 1000, num rounds = 10000, seed = 1, max_threads = 3, min_threads = 3
+thread stopping.
+Throughput = 58448901 operations per second.
+thread stopping.
+thread stopping.
+Done sleeping...
+sleep = 10, min = 7, max = 8, per thread = 1000, num rounds = 10000, seed = 1, max_threads = 4, min_threads = 4
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+Throughput = 64531954 operations per second.
+Done sleeping...
+sleep = 10, min = 7, max = 8, per thread = 1000, num rounds = 10000, seed = 1, max_threads = 5, min_threads = 5
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+Throughput = 70064383 operations per second.
+Done sleeping...
+sleep = 10, min = 7, max = 8, per thread = 1000, num rounds = 10000, seed = 1, max_threads = 6, min_threads = 6
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+Throughput = 78701111 operations per second.
+thread stopping.
+Done sleeping...
+sleep = 10, min = 7, max = 8, per thread = 1000, num rounds = 10000, seed = 1, max_threads = 7, min_threads = 7
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+Throughput = 82579923 operations per second.
+Done sleeping...
+sleep = 10, min = 7, max = 8, per thread = 1000, num rounds = 10000, seed = 1, max_threads = 8, min_threads = 8
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+Throughput = 84079445 operations per second.
+Done sleeping...
+sleep = 10, min = 7, max = 8, per thread = 1000, num rounds = 10000, seed = 1, max_threads = 9, min_threads = 9
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+Throughput = 85220602 operations per second.
+Done sleeping...
+sleep = 10, min = 7, max = 8, per thread = 1000, num rounds = 10000, seed = 1, max_threads = 10, min_threads = 10
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+Throughput = 87400651 operations per second.
+thread stopping.
+Done sleeping...
+sleep = 10, min = 7, max = 8, per thread = 1000, num rounds = 10000, seed = 1, max_threads = 11, min_threads = 11
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+Throughput = 89636285 operations per second.
+Done sleeping...
+sleep = 10, min = 7, max = 8, per thread = 1000, num rounds = 10000, seed = 1, max_threads = 12, min_threads = 12
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+Throughput = 87840583 operations per second.
+Done sleeping...
+sleep = 10, min = 7, max = 8, per thread = 1000, num rounds = 10000, seed = 1, max_threads = 13, min_threads = 13
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+Throughput = 89330190 operations per second.
+thread stopping.
+Done sleeping...
+sleep = 10, min = 7, max = 8, per thread = 1000, num rounds = 10000, seed = 1, max_threads = 14, min_threads = 14
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+Throughput = 88014585 operations per second.
+Done sleeping...
+sleep = 10, min = 7, max = 8, per thread = 1000, num rounds = 10000, seed = 1, max_threads = 15, min_threads = 15
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+Throughput = 88147514 operations per second.
+thread stopping.
+Done sleeping...
+sleep = 10, min = 7, max = 8, per thread = 1000, num rounds = 10000, seed = 1, max_threads = 16, min_threads = 16
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+thread stopping.
+Throughput = 83094856 operations per second.
 thread stopping.
 Done sleeping...
