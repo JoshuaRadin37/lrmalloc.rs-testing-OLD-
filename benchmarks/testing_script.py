@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import sys
+import subprocess
 #global variables
 allowed_allocators = ['hoard','jemalloc','tcmalloc','ptmalloc','super']
 allowed_tests = ['larson', 'threadtest', 't-test1', 't-test2','server','shbench']
@@ -33,7 +34,8 @@ def testing_routine():
                 #we update the allocators list
                 required_allocators = verify_allocators()
 
-            run_tests(required_testing, required_allocators)
+            outfile = run_tests(required_testing, required_allocators)
+            make_graph('output.txt')
 #here we check what tests the user chose if the user used '-t' option
 def verify_tests():
 
@@ -98,9 +100,9 @@ def make_dictionary(numthreads):
     test_dirs = {
                 'larson-hoard':'cd larson; ./larson-hoard 10 7 8 1000 10000 1 %s' % numthreads,
                 'larson-ptmalloc':'cd larson; ./larson-ptmalloc  10 7 8 1000 10000 1 1',
-                'larson-jemalloc':'cd larson; ./larson-jemalloc  10 7 8 1000 10000 1 1',
-                'larson-super':'cd larson; ./larson-super 10 7 8 1000 10000 1 1',
-                'larson-tcmalloc':'cd larson; ./larson-tcmalloc 10 7 8 1000 10000 1 1',
+                'larson-jemalloc':'cd larson; ./larson-jemalloc  10 7 8 1000 10000 1 1', 
+                'larson-super':'cd larson; ./larson-super 10 7 8 1000 10000 1 1' ,
+                'larson-tcmalloc':'cd larson; ./larson-tcmalloc 10 7 8 1000 10000 1 1' 
               #  't-test1-hoard': ''
               #  't-test1-ptmalloc' : ''
               #  't-test1-jemalloc' : ''
@@ -124,11 +126,12 @@ def make_dictionary(numthreads):
                  }
 
     return test_dirs
+
 #this function runs some tests on some allocators, currently does not support varied parameters
 #currently only supports allocators = [hoard] and tests = [larson]
 def run_tests(tests, allocators):
-    numthreads = capture_parameters()[0];
-
+    outfile = open('output.txt', 'w');
+    numthreads = capture_parameters()[0]
     #for each allocator, run tests
     #dictionary between tests and their locations
     for alloc in allocators:
@@ -137,5 +140,36 @@ def run_tests(tests, allocators):
                 test_dirs = make_dictionary(i)
                 test_key = test + "-" + alloc
                 print(test_key)
-                os.system(test_dirs.get(test_key))
+                #command_list = list(test_dirs.get(test_key).split(" "));
+               # print(command_list);
+                #subprocess.run(["cd"])
+                #os.system(test_dirs.get(test_key))
+                commands = test_dirs.get(test_key)
+                output = os.popen(commands).read()
+                print(output)
+                outfile.write(output)
+    outfile.close()
+#this function takes a textfile containing raw test results, splits it up, and makes x and y array
+#currently supports larson testing with numthreads as a parameter
+#TODO other tests and other parameters
+def make_graph(outfile):
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    output = open(outfile)
+    throughput_list = []
+    threads_list = []
+    line = output.readline()
+    numthreads = 1
+    while line:
+        word_list = line.split(" ")
+        if('Throughput' in word_list):
+            throughput_list.append(word_list[2])
+            threads_list.append(numthreads)
+            numthreads = numthreads + 1
+        line = output.readline()
+    print(throughput_list)
+    print(threads_list)
+    plt.plot(throughput_list, threads_list)
+    plt.savefig('result.png')
 testing_routine()
