@@ -170,6 +170,6 @@ def make_graph(outfile):
         line = output.readline()
     print(throughput_list)
     print(threads_list)
-    plt.plot(throughput_list, threads_list)
+    plt.plot(threads_list,throughput_list)
     plt.savefig('result.png')
 testing_routine()

@@ -26,7 +26,18 @@ threadtest
 To build the tests you can either run testing_script.py with the preferred arguments as mentioned above, or
 
 cd benchmarks
+
 make
 
+
 This will make all the tests included in this package and you can run these tests individually
+
+# argument varying instructions
+
+To do work with non default parameters the program has to be ran on one test at a time, here is a quick glossary on what the parameters are for each test, and which parameters could be iterated on.
+
+Larson:-  Parameters: <number-of-threads> <iterations> <num-objects> <work-interval> <object-size>
+
+Iterable parameters : <number-of-threads>
+
 
