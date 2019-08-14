@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+#Author : Shreif Abdallah
+#         University of Rochester
+#         Class of 2021
 import os
 import sys
 import subprocess
@@ -35,7 +38,8 @@ def testing_routine():
                 required_allocators = verify_allocators()
 
             outfile = run_tests(required_testing, required_allocators)
-            make_graph('output.txt')
+            if ( '-r' in (sys.argv)):
+                make_graph('output.txt')
 #here we check what tests the user chose if the user used '-t' option
 def verify_tests():
 
@@ -95,34 +99,41 @@ def capture_parameters():
     return parameter_array
 
 #this function makes the command dictionary of key : test name, and value : series of unix commands to run test
+#takes as input a parameters array
 def make_dictionary(numthreads):
+
     
     test_dirs = {
                 'larson-hoard':'cd larson; ./larson-hoard 10 7 8 1000 10000 1 %s' % numthreads,
-                'larson-ptmalloc':'cd larson; ./larson-ptmalloc  10 7 8 1000 10000 1 1',
-                'larson-jemalloc':'cd larson; ./larson-jemalloc  10 7 8 1000 10000 1 1', 
-                'larson-super':'cd larson; ./larson-super 10 7 8 1000 10000 1 1' ,
-                'larson-tcmalloc':'cd larson; ./larson-tcmalloc 10 7 8 1000 10000 1 1' 
-              #  't-test1-hoard': ''
-              #  't-test1-ptmalloc' : ''
-              #  't-test1-jemalloc' : ''
-              #  't-test1-super' : ''
-              #  't-test2-hoard' : ''
-              #  't-test2-ptmalloc' : ''
-              #  't-test2-jemalloc' : ''
-              #  't-test2-super'  : ''
-              #  'server-hoard ' : ''
-              #  'server-ptmalloc' : ''
-              #  'server-jemalloc' : ''
-              #  'server-super' : ''
-              #  'threadtest-hoard' : ''
-              #  'threadtest-ptmalloc' : ''
-              #  'threadtest-jemalloc' : ''
-              #  'threadtest-super'   : ''
-              #  'shbench-hoard' : ''
-              #  'shbench-ptmalloc' : ''
-              #  'shbench-jemalloc' : ''
-              #  'shbench-super' : ''
+                'larson-ptmalloc':'cd larson; ./larson-ptmalloc  10 7 8 1000 10000 1 %s' % numthreads,
+                'larson-jemalloc':'cd larson; ./larson-jemalloc  10 7 8 1000 10000 1 %s' % numthreads, 
+                'larson-super':'cd larson; ./larson-super 10 7 8 1000 10000 1 %s' % numthreads ,
+                'larson-tcmalloc':'cd larson; ./larson-tcmalloc 10 7 8 1000 10000 1 %s' % numthreads ,
+                't-test1-hoard': 'cd t-test1; ./t-test1-hoard %s 2 10000 10000 400 ' % numthreads ,
+                't-test1-ptmalloc': 'cd t-test1; ./t-test1-ptmalloc %s 2 10000 10000 400 ' % numthreads ,
+                't-test1-jemalloc': 'cd t-test1; ./t-test1-jemalloc %s 2 10000 10000 400 ' % numthreads ,
+                't-test1-super': 'cd t-test1; ./t-test1-super %s 2 10000 10000 400 ' % numthreads , 
+                't-test1-tcmalloc': 'cd t-test1; ./t-test1-tcmalloc %s 2 10000 10000 400 ' % numthreads , 
+                't-test2-hoard': 'cd t-test2; ./t-test2-hoard %s 2 10000 10000 400 ' % numthreads ,
+                't-test2-ptmalloc': 'cd t-test2; ./t-test2-ptmalloc %s 2 10000 10000 400 ' % numthreads ,
+                't-test2-jemalloc': 'cd t-test2; ./t-test2-jemalloc %s 2 10000 10000 400 ' % numthreads ,
+                't-test2-super': 'cd t-test2; ./t-test2-super %s 2 10000 10000 400 ' % numthreads ,
+                't-test2-tcmalloc': 'cd t-test2; ./t-test2-tcmalloc %s 2 10000 10000 400 ' % numthreads ,
+                'threadtest-hoard' : 'cd threadtest; ./threadtest-hoard %s 1000 10000 0 8' % numthreads ,
+                'threadtest-ptmalloc' : 'cd threadtest; ./threadtest-hoard %s 1000 10000 0 8' % numthreads ,
+                'threadtest-jemalloc' : 'cd threadtest; ./threadtest-hoard %s 1000 10000 0 8' % numthreads ,
+                'threadtest-super' : 'cd threadtest; ./threadtest-hoard %s 1000 10000 0 8' % numthreads ,
+                'threadtest-tcmalloc' : 'cd threadtest; ./threadtest-hoard %s 1000 10000 0 8' % numthreads ,
+                'shbench-hoard' : 'cd shbench; ./shbench-hoard 1' ,
+                'shbench-ptmalloc' : 'cd shbench; ./shbench-ptmalloc 1' ,
+                'shbench-jemalloc' : 'cd shbench; ./shbench-jemalloc 1' ,
+                'shbench-super' : 'cd shbench; ./shbench-super 1' ,
+                'shbench-tcmalloc' : 'cd shbench; ./shbench-tcmalloc 1',
+                'server-hoard' : 'cd SuperServer; ./server-hoard',
+                'server-ptmalloc' : 'cd SuperServer; ./server-hoard',
+                'server-jemalloc' : 'cd SuperServer; ./server-hoard',
+                'server-tcmalloc' : 'cd SuperServer; ./server-hoard',
+                'server-super' : 'cd SuperServer; ./server-hoard'
                  }
 
     return test_dirs
