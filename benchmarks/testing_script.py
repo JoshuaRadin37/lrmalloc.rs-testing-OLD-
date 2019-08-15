@@ -39,7 +39,7 @@ def testing_routine():
 
             outfile = run_tests(required_testing, required_allocators)
             if ( '-r' in (sys.argv)):
-                make_graph('output.txt')
+                make_graph('output.txt',required_allocators[0])
 #here we check what tests the user chose if the user used '-t' option
 def verify_tests():
 
@@ -162,7 +162,7 @@ def run_tests(tests, allocators):
 #this function takes a textfile containing raw test results, splits it up, and makes x and y array
 #currently supports larson testing with numthreads as a parameter
 #TODO other tests and other parameters
-def make_graph(outfile):
+def make_graph(outfile, alloc):
     print("graph making begins")
     import matplotlib
     matplotlib.use('Agg')
@@ -173,6 +173,7 @@ def make_graph(outfile):
     line = output.readline()
     numthreads = 1
     test = "none"
+    alloc = "none"
     while line:
         word_list = line.split(" ")
         if('larson' in word_list):
@@ -181,9 +182,9 @@ def make_graph(outfile):
                 word_list = line.split(" ")
                 if('Throughput' in word_list):
                     if(word_list[2] is ''):
-                        throughput_list.append(word_list[3])
+                        throughput_list.append(eval(word_list[3]))
                     else:
-                        throughput_list.append(word_list[2])
+                        throughput_list.append(eval(word_list[2]))
                     threads_list.append(numthreads)
                     numthreads = numthreads + 1
                 line = output.readline()
@@ -192,7 +193,7 @@ def make_graph(outfile):
     print(threads_list)
     plt.xlabel("Number of Threads")
     plt.ylabel("Throughput")
-    plt.title(test)
+    plt.title(test + " - "+ alloc)
     plt.plot(threads_list,throughput_list)
     plt.savefig('result.png')
 testing_routine()
