@@ -1,5 +1,8 @@
 # ralloc-testing
-Contains the testing scripts for the APF based memory allocator "ralloc"
+Contains the testing scripts for the APF based memory allocator "ralloc".
+
+Scroll down for a usuage example. 
+
 # main testing script
 The main testing script for this project is testing_script.py
 
@@ -14,7 +17,7 @@ There are four options
 
 '-p' After which you mention the arguments that you would like varied. There is an associated convention to this option. Currently this option only allows for variance of number of threads used by a test. This only applies to tests where number of threads is a parameter (larson, t-test1, t-test2).
 
-'-r' The results of the tests would be outputed to output.txt and if applicable would be graphed at result.png
+'-r' The results of the tests would be outputed to output.txt and if applicable would be graphed at result.png. This option supports only the larson test for now.
 
 
 Current implementation supports:-
