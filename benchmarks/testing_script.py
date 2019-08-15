@@ -191,7 +191,7 @@ def make_graph(outfile):
     print(throughput_list)
     print(threads_list)
     plt.xlabel("Number of Threads")
-    plt.ylabel("Throughput (operations per second)")
+    plt.ylabel("Throughput")
     plt.title(test)
     plt.plot(threads_list,throughput_list)
     plt.savefig('result.png')
