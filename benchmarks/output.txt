@@ -1,18 +1,6 @@
-currentrss=1612
-........................................................................................................................................................................................................before stopping: currentrss=338MiB
-Total_size_for_this_thread=40051355 big_a=5599000 big_d=-1
-Total_size_for_this_thread=38738626 big_a=4801000 big_d=-1
-Total_size_for_this_thread=38618725 big_a=8004000 big_d=-1
-Total_size_for_this_thread=38203721 big_a=13060000 big_d=-1
-a=705932 d=0, a=920258 d=0, a=712527 d=0, a=888478 d=0, 
-thread sum =40051355
-thread sum =38618725
-thread sum =38738626
-thread sum =38203721
-before deleting: currentrss=338MiB
-currentrss=338MiB
-maxrss=338MiB
+larson 
 sleep = 10, min = 7, max = 8, per thread = 1000, num rounds = 10000, seed = 1, max_threads = 1, min_threads = 1
-Throughput = 11430649 operations per second.
+Throughput =  9205697 operations per second.
 thread stopping.
 Done sleeping...
+end 

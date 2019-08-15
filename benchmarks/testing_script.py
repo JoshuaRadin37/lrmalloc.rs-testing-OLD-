@@ -47,7 +47,7 @@ def verify_tests():
         tests = []
         tIndex = sys.argv.index('-t') + 1
         for i in (sys.argv[tIndex:]):
-            if (i == '-a') or (i == '-p'):
+            if (i == '-a') or (i == '-p') or (i == '-r'):
                 break
             if (i not in allowed_tests):
                 raise Exception('{} is not an allowed test'.format(i))
@@ -66,7 +66,7 @@ def verify_allocators():
         allocators = []
         aIndex = sys.argv.index('-a') + 1
         for i in (sys.argv[aIndex:]):
-            if (i == '-t') or (i =='-p'):
+            if (i == '-t') or (i =='-p') or (i == '-r'):
                 break
             if (i not in allowed_allocators):
                 raise Exception('{} is not an allowed allocator'.format(i))
@@ -88,7 +88,7 @@ def capture_parameters():
         parameter_array = []
         numThreadIndex = sys.argv.index('-p') + 1;
         for i in (sys.argv[numThreadIndex:]):
-            if (i == '-t') or (i =='-a'):
+            if (i == '-t') or (i =='-a') or (i == '-r'):
                 break
             #TODO could do an eval step here and catch errors
             try:
@@ -147,23 +147,23 @@ def run_tests(tests, allocators):
     #dictionary between tests and their locations
     for alloc in allocators:
         for test in tests:
+            #TODO could write a specific line with test name to the outfile, and then decide which algorithm to use based on this
+            outfile.write(test+ " \n")
             for i in range (1, numthreads+1):
                 test_dirs = make_dictionary(i)
                 test_key = test + "-" + alloc
                 print(test_key)
-                #command_list = list(test_dirs.get(test_key).split(" "));
-               # print(command_list);
-                #subprocess.run(["cd"])
-                #os.system(test_dirs.get(test_key))
                 commands = test_dirs.get(test_key)
                 output = os.popen(commands).read()
                 print(output)
                 outfile.write(output)
+            outfile.write("end \n")
     outfile.close()
 #this function takes a textfile containing raw test results, splits it up, and makes x and y array
 #currently supports larson testing with numthreads as a parameter
 #TODO other tests and other parameters
 def make_graph(outfile):
+    print("graph making begins")
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
@@ -174,11 +174,18 @@ def make_graph(outfile):
     numthreads = 1
     while line:
         word_list = line.split(" ")
-        if('Throughput' in word_list):
-            throughput_list.append(word_list[2])
-            threads_list.append(numthreads)
-            numthreads = numthreads + 1
-        line = output.readline()
+        if('larson' in word_list):
+            while line and word_list[0] is not 'end':
+                word_list = line.split(" ")
+                if('Throughput' in word_list):
+                    if(word_list[2] is ''):
+                        throughput_list.append(word_list[3])
+                    else:
+                        throughput_list.append(word_list[2])
+                    threads_list.append(numthreads)
+                    numthreads = numthreads + 1
+                line = output.readline()
+    line = output.readline()
     print(throughput_list)
     print(threads_list)
     plt.plot(threads_list,throughput_list)
