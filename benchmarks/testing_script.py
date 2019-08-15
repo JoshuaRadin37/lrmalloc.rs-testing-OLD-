@@ -172,9 +172,11 @@ def make_graph(outfile):
     threads_list = []
     line = output.readline()
     numthreads = 1
+    test = "none"
     while line:
         word_list = line.split(" ")
         if('larson' in word_list):
+            test = "larson"
             while line and word_list[0] is not 'end':
                 word_list = line.split(" ")
                 if('Throughput' in word_list):
@@ -188,6 +190,9 @@ def make_graph(outfile):
     line = output.readline()
     print(throughput_list)
     print(threads_list)
+    plt.xlabel("Number of Threads")
+    plt.ylabel("Throughput (operations per second)")
+    plt.title(test)
     plt.plot(threads_list,throughput_list)
     plt.savefig('result.png')
 testing_routine()
