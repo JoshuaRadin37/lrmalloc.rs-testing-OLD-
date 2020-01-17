@@ -1,0 +1,12 @@
+[submodule "allocators/Hoard"]
+	path = allocators/Hoard
+	url = https://github.com/emeryberger/Hoard.git
+[submodule "allocators/jemalloc"]
+	path = allocators/jemalloc
+	url = https://github.com/jemalloc/jemalloc.git
+[submodule "allocators/gperftools"]
+	path = allocators/gperftools
+	url = https://github.com/gperftools/gperftools.git
+[submodule "allocators/SuperMalloc"]
+	path = allocators/SuperMalloc
+	url = https://github.com/kuszmaul/SuperMalloc.git
