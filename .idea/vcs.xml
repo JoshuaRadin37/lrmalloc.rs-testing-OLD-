@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/allocators/Hoard" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/allocators/Hoard/src/Heap-Layers" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/allocators/SuperMalloc" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/allocators/gperftools" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/allocators/jemalloc" vcs="Git" />
+  </component>
+</project>
