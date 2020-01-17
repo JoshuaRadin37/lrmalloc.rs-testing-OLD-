@@ -4,10 +4,6 @@ all : threadtest threadtest-hoard threadtest-tcmalloc threadtest-ptmalloc thread
 
 TARGET = threadtest threadtest-hoard threadtest-tcmalloc threadtest-ptmalloc threadtest-jemalloc
 
-MEMPATH = ../../memory_allocators/
-
-TCPATH = /usr/local/lib
-
 threadtest-hoard: threadtest.cpp
 	$(CXX) -std=c++14 $(CXXFLAGS) threadtest.cpp -L$(MEMPATH)/Hoard/src -Wl,-rpath=$(MEMPATH)/Hoard/src -lhoard -o threadtest-hoard -lpthread
 

@@ -1,9 +1,5 @@
 include ../Makefile.inc
 
-MEMPATH = ../../memory_allocators
-
-TCPATH = /usr/local/lib 
-
 all: larson larson-hoard larson-jemalloc larson-tcmalloc larson-ptmalloc larson-super
 
 TARGET = larson larson-hoard larson-jemalloc larson-tcmalloc larson-ptmalloc larson-super
@@ -13,7 +9,6 @@ larson: larson.cpp
 
 larson-hoard: larson.cpp
 	$(CXX) $(CXXFLAGS) larson.cpp -L$(MEMPATH)/Hoard/src -Wl,-rpath=$(MEMPATH)/Hoard/src -lhoard -o larson-hoard -lpthread
-
 
 larson-jemalloc: larson.cpp
 	$(CXX) $(CXXFLAGS) larson.cpp -L$(MEMPATH)/jemalloc/lib -Wl,-rpath=$(MEMPATH)/jemalloc/lib -ljemalloc -o larson-jemalloc -lpthread
@@ -26,5 +21,6 @@ larson-super: larson.cpp
 
 larson-tcmalloc: larson.cpp
 	$(CXX) $(CXXFLAGS) larson.cpp -L$(TCPATH) -Wl,-rpath=$(TCPATH) -ltcmalloc -o larson-tcmalloc -lpthread
+
 clean:
 	rm -f $(TARGET)

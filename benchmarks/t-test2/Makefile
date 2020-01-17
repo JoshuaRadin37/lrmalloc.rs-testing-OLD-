@@ -4,10 +4,6 @@ all : t-test2-ptmalloc3 t-test2-hoard t-test2-tcmalloc t-test2-jemalloc t-test2-
 
 TARGET = t-test2-ptmalloc3 t-test2-hoard t-test2-tcmalloc t-test2-jemalloc t-test2-super
 
-MEMPATH = ../../memory_allocators/
-
-TCPATH = /usr/local/lib 
-
 t-test2-ptmalloc3: t-test2.c
 	$(CC) $(CCFLAGS) t-test2.c -L$(MEMPATH)/ptmalloc3/ -Wl,-rpath=$(MEMPATH)/ptmalloc3/ -lptmalloc3 -o t-test2-ptmalloc3 -lpthread
 

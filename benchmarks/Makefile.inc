@@ -3,3 +3,7 @@ CXX := $(CXX)
 
 CCFLAGS  := -g -O3 -DNDEBUG -I/common
 CXXFLAGS := -g -O3 -DNDEBUG -I/common
+
+MEMPATH := ../../allocators
+
+TCPATH := /usr/local/lib

@@ -1,63 +1,35 @@
-# ralloc-testing
-Contains the testing scripts for the APF based memory allocator "ralloc".
+# ralloc-benchmarking
+Contains the testing scripts to perform benchmarking on `ralloc` and other allocators (for comparison purposes)
 
-Scroll down for a usuage example. 
+# Script
+The main script for this project is `benchmarking.py`
 
-# main testing script
-The main testing script for this project is testing_script.py
+This script runs simplifies the task of running specific benchmarks on desired allocators and collecting results.
 
-This script runs permutations of synthetic test executables on different malloc libraries 
-There are four options
+There are currently four command line flags:
+````
+-a <allocator name>
 
-'-help' which displays a manual on how to use this tool.
+-b <benchmark name>
 
-'-a' After which you include the names of the allocators you would like tested provided that they are supported by this implementation
+-p <number of threads> Only works with `larson`, `t-test1`, and `t-test2`
 
-'-t' After which you include the names of the tests you would like applied to the allocators you chose, there is no particualr order with which these options should be used.
+--graph     The results of the tests would be outputed to output.txt and if applicable would be graphed at result.png. This option supports only the larson test for now.
+````
 
-'-p' After which you mention the arguments that you would like varied. There is an associated convention to this option. Currently this option only allows for variance of number of threads used by a test. This only applies to tests where number of threads is a parameter (larson, t-test1, t-test2).
+Allocator options: `tcmalloc`, `jemalloc`, `ptmalloc`, `Hoard`, `SuperMalloc`
 
-'-r' The results of the tests would be outputed to output.txt and if applicable would be graphed at result.png. This option supports only the larson test for now.
+Benchmark options: `t-test1`, `t-test2`, `larson`, `threadtest`, `server` (from `SuperMalloc`), `shbench` (using `smrtheap`)
 
-
-Current implementation supports:-
-
-Allocators :-
-
-tcmalloc
-
-jemalloc
-
-ptmalloc
-
-Hoard
-
-SuperMalloc
-
-Tests:-
-
-t-test1
-
-t-test2
-
-larson
-
-threadtest
-
-server (from SuperMalloc)
-
-shbench (using smrtheap)
-
-
-# to build
-
-
+# To Build
+````
 cd benchmarks
-
 make
-
+````
 This will make all the test executables, you can run these individually or use testing_script.py.
 
+
+[This makes no sense. Will need to look into how each test is being run and do a proper mapping. this is a sloppy job]
 
 # argument varying instructions
 
@@ -66,11 +38,3 @@ To do work with non default parameters the program has to be ran on one test at 
 Larson:-  Parameters: <number-of-threads> <iterations> <num-objects> <work-interval> <object-size>
 
 Iterable parameters : <number-of-threads>
-
-# usage example
-
-./testing_script.py -a hoard -t larson -p 16 -r
-
-This command means to use the larson test on the allocator hoard and change the number of threads from 1 to 16 and plot the throughput (y axis) vs number of threads used (x axis).
-
-

@@ -1,32 +1,32 @@
--test names marked with --X are working correctly
+The following tests work correctly:
 
-larson-hoard --X
-t-test1-hoard -- X
-t-test2-hoard -- X
-threadtest-hoard --X
-larson-ptmalloc --X
-t-test1-ptmalloc --X
-t-test2-ptmalloc --X
-threadtest-ptmalloc --X
-larson-jemalloc --X
-t-test1-jemalloc -- X
-t-test2-jemalloc -- X
-threadtest-jemalloc --X
-larson-tcmalloc --X
-t-test1-tcmalloc --X
-t-test2-tcmalloc --X
-threadtest-tcmalloc --X
-server-super --X
-server-hoard --X
-server-tcmalloc --X
-server-jemalloc --X
-server-ptmalloc --X
-larson-super --X
-t-test1-super --X
-t-test2-super --X
-threadtest-super --X
-shbench-hoard --X
-shbench-ptmalloc --X
-shbench-jemalloc --X
-shbench-tcmalloc --X
-shbench-super --X
+larson-hoard
+t-test1-hoard
+t-test2-hoard
+threadtest-hoard
+larson-ptmalloc
+t-test1-ptmalloc
+t-test2-ptmalloc
+threadtest-ptmalloc
+larson-jemalloc
+t-test1-jemalloc
+t-test2-jemalloc
+threadtest-jemalloc
+larson-tcmalloc
+t-test1-tcmalloc
+t-test2-tcmalloc
+threadtest-tcmalloc
+server-super
+server-hoard
+server-tcmalloc
+server-jemalloc
+server-ptmalloc
+larson-super
+t-test1-super
+t-test2-super
+threadtest-super
+shbench-hoard
+shbench-ptmalloc
+shbench-jemalloc
+shbench-tcmalloc
+shbench-super

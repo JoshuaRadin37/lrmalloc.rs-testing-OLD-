@@ -4,10 +4,6 @@ all : shbench-ptmalloc3 shbench-hoard shbench-tcmalloc shbench-jemalloc shbench-
 
 TARGET = shbench-ptmalloc3 shbench-hoard shbench-tcmalloc shbench-jemalloc shbench-super
 
-MEMPATH = ../../memory_allocators/
-
-TCPATH = /usr/local/lib 
-
 shbench-ptmalloc3: shbench.c
 	$(CC) $(CCFLAGS) shbench.c -L$(MEMPATH)/ptmalloc3/ -Wl,-rpath=$(MEMPATH)/ptmalloc3/ -lptmalloc3 -o shbench-ptmalloc3 -lpthread
 

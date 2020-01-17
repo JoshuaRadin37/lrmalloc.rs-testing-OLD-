@@ -1,9 +1,5 @@
 include ../Makefile.inc
 
-MEMPATH = ../../memory_allocators
-
-TCPATH = /usr/local/lib 
-
 all: server-super server-hoard server-ptmalloc server-jemalloc server-tcmalloc
 
 TARGET = server-super server-hoard server-ptmalloc server-jemalloc server-tcmalloc
