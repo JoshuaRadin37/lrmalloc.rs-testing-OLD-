@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import os
 import sys
 
@@ -38,19 +40,26 @@ def get_defaults(what):
         return [1]
 
 
+def collect_fail(what):
+        print("No {} chosen, running all {}s".format(what, what))
+        return get_defaults(what)
+
 def collect(what):
     flag = "-"+what[0]
     flags = list(filter(lambda x: x != flag, all_flags))
 
     results = []
-    start = sys.argv.index(flag) + 1
+    try:
+        start = sys.argv.index(flag) + 1
+    except ValueError:
+        return collect_fail(what)
     for arg in sys.argv[start:]:
         if arg in flags:
             break
         results.append(arg)
+        
     if len(results) == 0:
-        print("No {} chosen, running all {}s".format(what, what))
-        return get_defaults(what)
+        return collect_fail(what)
     return results
 
 
@@ -108,14 +117,15 @@ def run_benchmarks(benchmarks, allocators):
             bench_alloc = benchmark + "-" + allocator
             outfile = open("{}.txt".format(bench_alloc), "w")
             for i in range(num_threads):
-                outfile.write("----------- START {} THREAD(S) -----------\n".format(i))
-                benchmark_dirs = make_dictionary(i+1)
-                print("Performing {} with {} thread(s)".format(bench_alloc, i))
+                N=i+1
+                outfile.write("----------- START {} THREAD(S) -----------\n".format(N))
+                benchmark_dirs = make_dictionary(N)
+                print("Performing {} with {} thread(s)".format(bench_alloc, N))
                 commands = benchmark_dirs.get(bench_alloc)
-                output = os.popen(commands).read()
+                output = os.popen("cd benchmarks; {}".format(commands)).read()
                 print(output)
                 outfile.write(output)
-                outfile.write("----------- END {} THREAD(S) -----------\n\n".format(i))
+                outfile.write("----------- END {} THREAD(S) -----------\n\n".format(N))
             outfile.write("---- OVER ----\n")
             outfile.close()
 

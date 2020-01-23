@@ -183,7 +183,7 @@ unsigned uThreadCount = 1;
 
 void doBench(void *);
 
-void main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	clock_t startCPU;
 	time_t startTime;
@@ -302,7 +302,7 @@ void main(int argc, char *argv[])
 
 void doBench(void *arg)
 { 
-  char **memory = malloc(ulCallCount * sizeof(void *));
+  char **memory = (char**) malloc(ulCallCount * sizeof(void *));
   int	size_base, size, iterations;
   int	repeat = ulCallCount;
   char **mp = memory;
