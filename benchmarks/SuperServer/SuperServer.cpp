@@ -22,6 +22,9 @@
 #include <thread>
 #include <unistd.h>
 #include <valgrind/helgrind.h>
+	
+uint64_t num_allocs = 0;
+uint64_t time_spent = 0;
 
 struct object {
     int64_t expiration_date;
@@ -40,7 +43,9 @@ struct object {
 	memset(data, 3, s);
         clock_gettime(CLOCK_MONOTONIC, &end);
         time_to_alloc = (end.tv_sec - start.tv_sec) * 1000000000ul + (end.tv_nsec - start.tv_nsec); 
-    }
+    	num_allocs++;
+		time_spent += time_to_alloc;
+	}
     ~object() {
         if (data) {
 	  free(data);
@@ -230,10 +235,9 @@ int main(int argc __attribute__((unused)), char *argv[] __attribute__((unused)))
         printf("a=%ld d=%ld, ", thread_infos[i].a_count, thread_infos[i].d_count);
     }
     printf("\n");
-
     for (int i = 0; i < n_threads; i++) {
         int64_t sum_this_thread = 0;
-        while (!thread_infos[i].objects.empty()) {
+		while (!thread_infos[i].objects.empty()) {
             object *o = thread_infos[i].objects.top();
             sum_this_thread += o->size;
             thread_infos[i].objects.pop();
@@ -246,5 +250,6 @@ int main(int argc __attribute__((unused)), char *argv[] __attribute__((unused)))
     delete [] thread_infos;
     printf("currentrss=%ldMiB\n", getrss()/1024);
     printf("maxrss=%ldMiB\n", maxrss/1024);
+	printf("Throughput = %ld allocations per second, %8ld ... %8ld\n", num_allocs/(time_spent/1000000ul), num_allocs, time_spent);
     return 0;
 }

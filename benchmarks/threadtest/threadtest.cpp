@@ -48,7 +48,7 @@ int nobjects = 30000;  // Default number of objects.
 int nthreads = 1;	// Default number of threads.
 int work = 0;		// Default number of loop iterations.
 int objSize = 1;
-
+uint64_t num_allocs = 0;
 
 class Foo {
 public:
@@ -67,7 +67,7 @@ void worker ()
   int i, j;
   Foo ** a;
   a = new Foo * [nobjects / nthreads];
-
+	
   for (j = 0; j < niterations; j++) {
 
     for (i = 0; i < (nobjects / nthreads); i ++) {
@@ -145,7 +145,7 @@ int main (int argc, char * argv[])
   auto elapsed = duration_cast<duration<double>>(stop - start);
 
   cout << "Time elapsed = " << elapsed.count() << endl;
-
+  cout << "Throughput = " << nthreads*(1+objSize)/elapsed.count() << " allocations per second" << endl;
   delete [] threads;
 
   return 0;

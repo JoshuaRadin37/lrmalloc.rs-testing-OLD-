@@ -132,45 +132,41 @@ def run_benchmarks(benchmarks, allocators):
     
     os.system("mv *.txt {}".format(new_dir))
 
+# Supports: 
+# larson
+# shbench
+# SuperServer
 
-# this function takes a textfile containing raw benchmark results, splits it up, and makes x and y array
-# currently supports larson benchmarking with numthreads as a parameter
-# TODO other benchmarks and other parameters
+def parse_result(outfile):
+    output = open(outfile)
+    throughput = []
+    threads = []
+    num_threads = None
+    while line = output.readline():
+        line_list = line.split(" ")
+        if line_list[1] == "START" and line_list[3] == "THREAD(S)":
+            threads.append(int(line_list[2])
+        if line_list[0] == "Throughput":
+            throughput.append(float(line_list[2]))
+    return (throughputs, threads)
+
+
+"""
+Todo: Add legend for charts
+      Combine results to have single chart per allocator
+"""
+
 def make_graph(outfile):
     print("graph making begins")
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    output = open(outfile)
-    throughput_list = []
-    threads_list = []
-    num_threads = 1
-    benchmark = outfile.split("/")[1].split("-")[0]
-    print("start reading {}".format(outfile))
-    count = 1
-    line = output.readline()
-    while line:
-        word_list = line.split(" ")
-        while line and word_list[0] != "end":
-            print("line {}".format(count))
-            count += 1
-            word_list = line.split(" ")
-            if "Throughput" in word_list:
-                if word_list[2] == "":
-                    throughput_list.append(eval(word_list[3]))
-                else:
-                    throughput_list.append(eval(word_list[2]))
-                threads_list.append(num_threads)
-                num_threads = num_threads + 1
-            line = output.readline()
-    line = output.readline()
-    print(throughput_list)
-    print(threads_list)
+    throughputs, threads = parse_result(outfile)
     plt.xlabel("Number of Threads")
     plt.ylabel("Throughput")
     name = outfile.split("/")[1].split(".")[0]
     plt.title(name)
-    plt.plot(threads_list, throughput_list)
+    plt.plot(threads, throughputs)
     plt.savefig("{}/{}.png".format(new_dir, name))
 
 

@@ -152,6 +152,7 @@ FILE *fout, *fin;
 unsigned uMaxBlockSize = 1000;
 unsigned uMinBlockSize = 1;
 unsigned long ulCallCount = 1000;
+unsigned long num_allocs = 0;
 
 unsigned long promptAndRead(char *msg, unsigned long defaultVal, char fmtCh);
 
@@ -288,11 +289,11 @@ int main(int argc, char *argv[])
 #ifdef SYS_MULTI_THREAD
 			  " for %d threads"
 #endif
-			  ": %.2f (%.4f CPU)\n",
+			  ": %.2f (%.4f CPU)\nThroughput = %8ld allocations per second\n",
 #ifdef SYS_MULTI_THREAD
 			  uThreadCount,
 #endif
-			  elapsedTime, cpuTime);
+			  elapsedTime, cpuTime, num_allocs/cpuTime);
 
 	if (fin != stdin)
 		fclose(fin);
@@ -309,6 +310,7 @@ void doBench(void *arg)
   char **mpe = memory + ulCallCount;
   char **save_start = mpe;
   char **save_end = mpe;
+  num_allocs = 0;
 
   while (repeat--)  
   { 
@@ -332,12 +334,13 @@ void doBench(void *arg)
 
 			while (iterations--)
 			{ 
-
+				
 				if (!memory || !(*mp ++ = (char *)malloc(size)))
 				{
 					printf("Out of memory\n");
 					_exit (1);
 				}
+				num_allocs++;
 
 	  /* while allocating skip over that portion of the buffer that still
 	     holds pointers from the previous cycle
