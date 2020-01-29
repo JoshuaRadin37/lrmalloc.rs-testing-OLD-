@@ -1,14 +1,15 @@
 include ../Makefile.inc
 
-all: build
+TARGET = build
 
 build:
+	
 	declare -A PATHS=($(ALLOCNAMES)); \
 	for name in $${!PATHS[@]}; do \
 		path=$${PATHS[$$name]}; \
 		echo $$path; \
-		$(CXX) $(CXXFLAGS) shbench.c -L$$path -Wl,-rpath=$$path -l$$name -o shbench-$$name -lpthread; \
+		$(CC) $(CCFLAGS) shbench.$(CCEXT) -L$$path -Wl,-rpath=$$path -l$$name -o shbench-$$name -lpthread; \
 	done;
 
 clean:
-	rm -f $(TARGET)
+	rm -f shbench-*

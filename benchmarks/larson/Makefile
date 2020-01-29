@@ -1,6 +1,6 @@
 include ../Makefile.inc
 
-all: build
+TARGET = build
 
 build:
 	$(CXX) $(CXXFLAGS) larson.cpp -o larson -lpthread; \
@@ -8,8 +8,8 @@ build:
 	for name in $${!PATHS[@]}; do \
 		path=$${PATHS[$$name]}; \
 		echo $$path; \
-		$(CXX) $(CXXFLAGS) larson.cpp -L$$path -Wl,-rpath=$$path -l$$name -o larson-$$name -lpthread; \
+		$(CXX) $(CXXFLAGS) larson.$(CXXEXT) -L$$path -Wl,-rpath=$$path -l$$name -o larson-$$name -lpthread; \
 	done;
 
 clean:
-	rm -f $(TARGET)
+	rm -f larson-*

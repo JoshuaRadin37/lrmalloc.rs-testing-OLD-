@@ -1,14 +1,15 @@
 include ../Makefile.inc
 
-all: build
+TARGET = build
 
 build:
+	
 	declare -A PATHS=($(ALLOCNAMES)); \
 	for name in $${!PATHS[@]}; do \
 		path=$${PATHS[$$name]}; \
 		echo $$path; \
-		$(CXX) $(CXXFLAGS) server.cc -L$$path -Wl,-rpath=$$path -l$$name -o server-$$name -lpthread; \
+		$(CXX) $(CXXFLAGS) SuperServer.$(CXXEXT) -L$$path -Wl,-rpath=$$path -l$$name -o SuperServer-$$name -lpthread; \
 	done;
 
 clean:
-	rm -f $(TARGET)
+	rm -f SuperServer-*

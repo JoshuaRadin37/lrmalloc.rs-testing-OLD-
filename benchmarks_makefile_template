@@ -1,0 +1,15 @@
+include ../Makefile.inc
+
+TARGET = build
+
+build:
+	{1}
+	declare -A PATHS=($(ALLOCNAMES)); \
+	for name in $${{!PATHS[@]}}; do \
+		path=$${{PATHS[$$name]}}; \
+		echo $$path; \
+		$({2}) $({2}FLAGS) {0}.$({2}EXT) -L$$path -Wl,-rpath=$$path -l$$name -o {0}-$$name -lpthread; \
+	done;
+
+clean:
+	rm -f {0}-*
