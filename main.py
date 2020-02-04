@@ -2,7 +2,9 @@
 
 import os
 import sys
+import subprocess
 from datetime import datetime
+import time
 
 # Original Author : Shreif Abdallah
 #         University of Rochester
@@ -21,16 +23,15 @@ all_allocators = ["hoard", "jemalloc", "tcmalloc", "ptmalloc3", "supermalloc", "
 all_benchmarks = ["t-test1", "t-test2", "larson", "threadtest", "shbench", "SuperServer"]
 all_flags = ["-a", "-b", "-p", "--graph"]
 new_dir = "results_{}".format(int(datetime.timestamp(datetime.now())))
-#new_dir = "results_1580316919"
 
 def main():
     gen_benchmarks_makefiles()
     os.system("cd benchmarks && make clean && make")
     allocators = collect("allocator")
-    run_benchmarks(collect("benchmark"), allocators)
+    num_threads = int(collect("parameter")[0])
+    results = run_benchmarks(collect("benchmark"), allocators, num_threads)
     if "--graph" in sys.argv:
-        for allocator in all_allocators:
-            make_graph("{}/larson-{}.txt".format(new_dir, allocator))
+        make_graph(results, num_threads)
 
 def get_benchmark_lang_flag(benchmark):
     if benchmark in ["shbench", "t-test1", "t-test2"]:
@@ -98,76 +99,101 @@ def generate_test_cmd(benchmark, allocator, num_threads):
             "shbench": " 1",
             "SuperServer": ""
     }
-    return "cd {0} && ./{0}-{1} {2}".format(benchmark, allocator, param_list[benchmark])
-    #cmd = {}
-    #for allocator in all_allocators:
-    #    for benchmark in all_benchmarks:
-    #        cmd["{0}-{1}".format(benchmark, allocator)] = "cd {0} && ./{0}-{1} {2}".format(benchmark, allocator, param_list[benchmark])
-    #
-    #return cmd
+    # currently using time command because we don't need super precise metrics
+    return "./{0}/{0}-{1} {2}".format(benchmark, allocator, param_list[benchmark])
+    #return "time ./{0}/{0}-{1} {2}".format(benchmark, allocator, param_list[benchmark])
 
 
-def run_benchmarks(benchmarks, allocators):
-    try:
-        num_threads = int(collect("parameter")[0])
-    except ValueError:
-        print("Expected integer after -p flag")
-        sys.exit()
-    os.system("mkdir {}".format(new_dir))
-    for allocator in allocators:
-        for benchmark in benchmarks:
+def run_benchmarks(benchmarks, allocators, num_threads):
+    thread_list = list(range(1, num_threads+1))
+    os.mkdir(new_dir)
+
+    """
+        results -> allocators -> benchmarks -> [data; num_threads]  ; data is currently time
+    """
+    os.chdir("benchmarks")
+    for benchmark in benchmarks:
+        results = {}
+        for allocator in allocators:
+            results[allocator] = []
             bench_alloc = benchmark + "-" + allocator
-            outfile = open("{}.txt".format(bench_alloc), "w")
-            for i in range(num_threads):
-                N=i+1
-                outfile.write("----------- START {} THREAD(S) -----------\n".format(N))
-                commands = generate_test_cmd(benchmark, allocator, N)
-                print("Performing {} with {} thread(s)".format(bench_alloc, N))
-                output = os.popen("cd benchmarks && {}".format(commands)).read()
-                print(output)
-                outfile.write(output)
-                outfile.write("----------- END {} THREAD(S) -----------\n\n".format(N))
-            outfile.write("---- OVER ----\n")
-            outfile.close()
+            #outfile = open("{}.txt".format(bench_alloc), "w")
+
+            for n in thread_list:
+                #outfile.write("----------- START {} THREAD(S) -----------\n".format(n))
+                cmd = generate_test_cmd(benchmark, allocator, n)
+                start = time.time()
+                proc = subprocess.run(cmd.split(" ")) #, capture_output=True)
+                end = time.time()
+                # _, stderr = map(lambda x: x.decode("utf-8"), (proc.stdout, proc.stderr))
+                # outfile.write(stdout)
+                # outfile.write("----------- END {} THREAD(S) -----------\n\n".format(n))
+                #try:
+                #    time = float(stderr.split("\n")[0].split(" ")[1])
+                #except ValueError:
+                #    print("Time command results could not be parsed")
+                #    print(stderr)
+                #    sys.exit(3)
     
-    os.system("mv *.txt {}".format(new_dir))
+                results[allocator].append(end-start)
+            
+            #outfile.write("---- OVER ----\n")
+            #outfile.close()
+        if "--graph" in sys.argv:
+            make_graph(benchmark, results, num_threads)
+    os.chdir("..")
+    #os.system("mv benchmarks/*.txt {}".format(new_dir))
 
 # Supports: 
 # larson
 # shbench
 # SuperServer
 
-def parse_result(outfile):
-    output = open(outfile)
-    throughput = []
-    threads = []
-    num_threads = None
-    while line = output.readline():
-        line_list = line.split(" ")
-        if line_list[1] == "START" and line_list[3] == "THREAD(S)":
-            threads.append(int(line_list[2])
-        if line_list[0] == "Throughput":
-            throughput.append(float(line_list[2]))
-    return (throughputs, threads)
-
+#def parse_result(outfile):
+#    output = open(outfile)
+#    throughput = []
+#    threads = []
+#    num_threads = None
+#    while line = output.readline():
+#        line_list = line.split(" ")
+#        if line_list[1] == "START" and line_list[3] == "THREAD(S)":
+#            threads.append(int(line_list[2])
+#        if line_list[0] == "Throughput:":
+#            throughput.append(float(line_list[2]))
+#    return (throughputs, threads)
+#
 
 """
 Todo: Add legend for charts
       Combine results to have single chart per allocator
 """
 
-def make_graph(outfile):
-    print("graph making begins")
+def make_graph(benchmark, results, num_threads):
+    print("Generating Graph")
     import matplotlib
     matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-    throughputs, threads = parse_result(outfile)
-    plt.xlabel("Number of Threads")
-    plt.ylabel("Throughput")
-    name = outfile.split("/")[1].split(".")[0]
-    plt.title(name)
-    plt.plot(threads, throughputs)
-    plt.savefig("{}/{}.png".format(new_dir, name))
+    import matplotlib.pyplot as g
+    
+   # coloring = {
+   #     "hoard": "blue",  
+   #     "jemalloc": "yellow",
+   #     "ptmalloc3": "green",
+   #     "supermalloc": "violet",
+   #     "tcmalloc": "brown",
+   #     "ralloc": "red"
+   # }
+
+    g.xlabel("Number of Threads")
+    g.ylabel("Time/s")
+
+    thread_list = list(range(1, num_threads+1))
+    for allocator, time in results.items():
+        g.plot(thread_list, time, label=allocator) #, color="tab:"+coloring[allocator], linelength=0.05)
+    
+    g.legend()
+    g.title(benchmark)
+    g.savefig("{}.png".format(benchmark))
+    os.rename(*("{0}.png ../{1}/{0}.png".format(benchmark, new_dir).split(" ")))
 
 
 if __name__ == "__main__":
