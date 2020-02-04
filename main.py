@@ -30,8 +30,6 @@ def main():
     allocators = collect("allocator")
     num_threads = int(collect("parameter")[0])
     results = run_benchmarks(collect("benchmark"), allocators, num_threads)
-    if "--graph" in sys.argv:
-        make_graph(results, num_threads)
 
 def get_benchmark_lang_flag(benchmark):
     if benchmark in ["shbench", "t-test1", "t-test2"]:
@@ -114,16 +112,19 @@ def run_benchmarks(benchmarks, allocators, num_threads):
     os.chdir("benchmarks")
     for benchmark in benchmarks:
         results = {}
+        print(benchmark)
         for allocator in allocators:
+            print(allocator)
             results[allocator] = []
             bench_alloc = benchmark + "-" + allocator
             #outfile = open("{}.txt".format(bench_alloc), "w")
 
             for n in thread_list:
+                print("Thread {} starting".format(n))
                 #outfile.write("----------- START {} THREAD(S) -----------\n".format(n))
                 cmd = generate_test_cmd(benchmark, allocator, n)
                 start = time.time()
-                proc = subprocess.run(cmd.split(" ")) #, capture_output=True)
+                proc = subprocess.run(cmd.split(" "), capture_output=True)
                 end = time.time()
                 # _, stderr = map(lambda x: x.decode("utf-8"), (proc.stdout, proc.stderr))
                 # outfile.write(stdout)
@@ -136,7 +137,7 @@ def run_benchmarks(benchmarks, allocators, num_threads):
                 #    sys.exit(3)
     
                 results[allocator].append(end-start)
-            
+                print("Thread {} over".format(n))
             #outfile.write("---- OVER ----\n")
             #outfile.close()
         if "--graph" in sys.argv:
