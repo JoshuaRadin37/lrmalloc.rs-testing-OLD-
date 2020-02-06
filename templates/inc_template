@@ -1,0 +1,21 @@
+CC := $(CC)
+CXX := $(CXX)
+
+CCEXT := c
+CXXEXT := cpp
+
+MEMPATH := ../../allocators
+
+{0}
+
+ALLOCPATHS = {1}
+ALLOCNAMES = {2}
+
+create_make = \
+	declare -A PATHS=($(ALLOCNAMES)); \
+	for name in $${{!PATHS[@]}}; do \
+		path=$${{PATHS[$$name]}}; \
+		echo $$path; \
+		$($(1)) -g -O3 -DNDEBUG -I/common $(2).$($(1)EXT) -L$$path -Wl,-rpath=$$path -l$$name -o $(2)-$$name -lpthread; \
+	done;
+

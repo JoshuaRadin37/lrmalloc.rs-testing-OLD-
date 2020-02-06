@@ -1,0 +1,9 @@
+include ../Makefile.inc
+
+TARGET = build
+
+build:
+	$(call create_make,{0},{1})
+
+clean:
+	rm -f {0}-*

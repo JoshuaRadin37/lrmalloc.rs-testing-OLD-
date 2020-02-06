@@ -19,17 +19,37 @@ Maintained by:  Michael Chavrimootoo
                 University of Rochester
 """
 
-all_allocators = ["hoard", "jemalloc", "tcmalloc", "ptmalloc3", "supermalloc", "ralloc"]
-all_benchmarks = ["t-test1", "t-test2", "larson", "threadtest", "shbench", "SuperServer"]
-all_flags = ["-a", "-b", "-p", "--graph"]
+allocator_path_map = {
+    "hoard": "Hoard/src",
+    "jemalloc": "jemalloc/lib",
+    "tcmalloc": "gperftools/lib",
+    "ptmalloc3": "ptmalloc3",
+    "supermalloc": "SuperMalloc/release/lib",
+    "ralloc": "ralloc/target/release"
+}
+benchmark_param_list = {
+    "larson": " 10 7 8 1000 10000 1 {}",
+    "t-test1": " {} 2 10000 10000 400",
+    "t-test2": " {} 2 10000 10000 400",
+    "threadtest": " {} 1000 10000 0 8",
+    "shbench": " 1",
+    "SuperServer": ""
+}
+all_allocators = allocator_path_map.keys()
+all_benchmarks = benchmark_param_list.keys()
+all_flags = ["-a", "-b", "-t", "--graph"]
 new_dir = "results_{}".format(int(datetime.timestamp(datetime.now())))
 
+
 def main():
-    gen_benchmarks_makefiles()
-    os.system("cd benchmarks && make clean && make")
     allocators = collect("allocator")
-    num_threads = int(collect("parameter")[0])
-    results = run_benchmarks(collect("benchmark"), allocators, num_threads)
+    benchmarks = collect("benchmark")
+    gen_benchmarks_makefiles(allocators, benchmarks)
+    os.system("cd benchmarks && make > /dev/null")
+    num_threads = int(collect("thread")[0])
+    run_benchmarks(benchmarks, allocators, num_threads)
+    os.system("cd benchmarks && make clean > /dev/null && rm Makefile*")
+
 
 def get_benchmark_lang_flag(benchmark):
     if benchmark in ["shbench", "t-test1", "t-test2"]:
@@ -38,36 +58,63 @@ def get_benchmark_lang_flag(benchmark):
         return "CXX"
     raise ValueError
 
-def gen_benchmarks_makefiles():
-    larson_simple = "$(CXX) $(CXXFLAGS) larson.cpp -o larson -lpthread; \\"
-    with open("benchmarks_makefile_template", "r") as f:
+
+def format_allocators_used(allocators):
+
+    path_list = []
+    array_path_list = []
+    array_list = []
+    for allocator in allocators:
+        path_list.append("{}_path := $(MEMPATH)/{}".format(allocator, allocator_path_map[allocator]))
+        array_path_list.append("$({}_path)".format(allocator))
+        array_list.append("[\"{0}\"]='$({0}_path)'".format(allocator))
+
+    return "\n".join(path_list), " ".join(array_path_list), " ".join(array_list)
+
+
+def gen_benchmarks_makefiles(allocators, benchmarks):
+    template = "" 
+    with open("templates/inc_template", "r") as f:
         template = f.read()
+    assert(template != "")
     os.chdir("benchmarks") 
-    for benchmark in all_benchmarks:
+    with open("Makefile.inc", "w") as f:
+        f.write(template.format(*format_allocators_used(allocators)))
+    os.chdir("..")
+    
+    template = "" 
+    with open("templates/benchmarks_template", "r") as f:
+        template = f.read()
+    assert(template != "")
+    os.chdir("benchmarks") 
+    with open("Makefile", "w") as f:
+        f.write(template.format(" ".join(benchmarks)))
+    os.chdir("..")
+    template = "" 
+    with open("templates/makefile_template", "r") as f:
+        template = f.read()
+    assert(template != "")
+    os.chdir("benchmarks")
+    for benchmark in benchmarks:
+        os.chdir(benchmark)
         try:
             lang_flag = get_benchmark_lang_flag(benchmark)
         except ValueError:
-            print("Unsupported benchmark language")
             sys.exit(3)
-        os.chdir(benchmark)
         with open("Makefile", "w") as f:
-            f.write(template.format(benchmark, larson_simple if benchmark == "larson" else "", lang_flag))
+            f.write(template.format(lang_flag, benchmark))
         os.chdir("..")
     os.chdir("..")
-    
+
 
 def get_defaults(what):
     if what == "allocator":
         return all_allocators
     if what == "benchmark":
         return all_benchmarks
-    if what == "parameter":
+    if what == "thread":
         return [16]
 
-
-def collect_fail(what):
-        print("No {} chosen, running all {}s".format(what, what))
-        return get_defaults(what)
 
 def collect(what):
     flag = "-"+what[0]
@@ -76,39 +123,22 @@ def collect(what):
     results = []
     try:
         start = sys.argv.index(flag) + 1
+        for arg in sys.argv[start:]:
+            if arg in flags:
+                break
+            results.append(arg)        
+        if len(results) == 0:
+            raise ValueError()
     except ValueError:
-        return collect_fail(what)
-    for arg in sys.argv[start:]:
-        if arg in flags:
-            break
-        results.append(arg)
-        
-    if len(results) == 0:
-        return collect_fail(what)
+        print("No {} chosen, running all {}s".format(what, what))
+        return get_defaults(what)
+
     return results
-
-
-def generate_test_cmd(benchmark, allocator, num_threads):
-    param_list = {
-            "larson": " 10 7 8 1000 10000 1 {}".format(num_threads),
-            "t-test1": " {} 2 10000 10000 400".format(num_threads),
-            "t-test2": " {} 2 10000 10000 400".format(num_threads),
-            "threadtest": " {} 1000 10000 0 8".format(num_threads),
-            "shbench": " 1",
-            "SuperServer": ""
-    }
-    # currently using time command because we don't need super precise metrics
-    return "./{0}/{0}-{1} {2}".format(benchmark, allocator, param_list[benchmark])
-    #return "time ./{0}/{0}-{1} {2}".format(benchmark, allocator, param_list[benchmark])
 
 
 def run_benchmarks(benchmarks, allocators, num_threads):
     thread_list = list(range(1, num_threads+1))
-    os.mkdir(new_dir)
 
-    """
-        results -> allocators -> benchmarks -> [data; num_threads]  ; data is currently time
-    """
     os.chdir("benchmarks")
     for benchmark in benchmarks:
         results = {}
@@ -116,58 +146,24 @@ def run_benchmarks(benchmarks, allocators, num_threads):
         for allocator in allocators:
             print(allocator)
             results[allocator] = []
-            bench_alloc = benchmark + "-" + allocator
-            #outfile = open("{}.txt".format(bench_alloc), "w")
 
             for n in thread_list:
                 print("Thread {} starting".format(n))
-                #outfile.write("----------- START {} THREAD(S) -----------\n".format(n))
-                cmd = generate_test_cmd(benchmark, allocator, n)
+                cmd = "./{0}/{0}-{1} {2}".format(benchmark, allocator, benchmark_param_list[benchmark].format(num_threads))
                 start = time.time()
-                proc = subprocess.run(cmd.split(" "), capture_output=True)
-                end = time.time()
-                # _, stderr = map(lambda x: x.decode("utf-8"), (proc.stdout, proc.stderr))
-                # outfile.write(stdout)
-                # outfile.write("----------- END {} THREAD(S) -----------\n\n".format(n))
-                #try:
-                #    time = float(stderr.split("\n")[0].split(" ")[1])
-                #except ValueError:
-                #    print("Time command results could not be parsed")
-                #    print(stderr)
-                #    sys.exit(3)
-    
+                try:
+                    process = subprocess.run(cmd.split(" "), capture_output=True)
+                    end = time.time()
+                except FileNotFoundError:
+                    sys.exit()
+                print(end-start)
+                #print((end-start)*10000)
                 results[allocator].append(end-start)
                 print("Thread {} over".format(n))
-            #outfile.write("---- OVER ----\n")
-            #outfile.close()
-        if "--graph" in sys.argv:
-            make_graph(benchmark, results, num_threads)
+#        if "--graph" in sys.argv:
+        make_graph(benchmark, results, num_threads)
     os.chdir("..")
-    #os.system("mv benchmarks/*.txt {}".format(new_dir))
 
-# Supports: 
-# larson
-# shbench
-# SuperServer
-
-#def parse_result(outfile):
-#    output = open(outfile)
-#    throughput = []
-#    threads = []
-#    num_threads = None
-#    while line = output.readline():
-#        line_list = line.split(" ")
-#        if line_list[1] == "START" and line_list[3] == "THREAD(S)":
-#            threads.append(int(line_list[2])
-#        if line_list[0] == "Throughput:":
-#            throughput.append(float(line_list[2]))
-#    return (throughputs, threads)
-#
-
-"""
-Todo: Add legend for charts
-      Combine results to have single chart per allocator
-"""
 
 def make_graph(benchmark, results, num_threads):
     print("Generating Graph")
@@ -175,27 +171,18 @@ def make_graph(benchmark, results, num_threads):
     matplotlib.use("Agg")
     import matplotlib.pyplot as g
     
-   # coloring = {
-   #     "hoard": "blue",  
-   #     "jemalloc": "yellow",
-   #     "ptmalloc3": "green",
-   #     "supermalloc": "violet",
-   #     "tcmalloc": "brown",
-   #     "ralloc": "red"
-   # }
-
     g.xlabel("Number of Threads")
     g.ylabel("Time/s")
 
     thread_list = list(range(1, num_threads+1))
-    for allocator, time in results.items():
-        g.plot(thread_list, time, label=allocator) #, color="tab:"+coloring[allocator], linelength=0.05)
+    for allocator, time_value in results.items():
+        g.plot(thread_list, time_value, label=allocator)
     
     g.legend()
     g.title(benchmark)
-    g.savefig("{}.png".format(benchmark))
-    os.rename(*("{0}.png ../{1}/{0}.png".format(benchmark, new_dir).split(" ")))
-
+    graph_name = "{}_{}.png".format(benchmark, new_dir.split("_")[1])
+    g.savefig(graph_name)
+    os.rename(graph_name, "../graphs/{}".format(graph_name))
 
 if __name__ == "__main__":
     main()
