@@ -152,7 +152,7 @@ def run_benchmarks(benchmarks, allocators, num_threads):
                 cmd = "./{0}/{0}-{1} {2}".format(benchmark, allocator, benchmark_param_list[benchmark].format(num_threads))
                 start = time.time()
                 try:
-                    process = subprocess.run(cmd.split(" "), capture_output=True)
+                    process = subprocess.run(cmd.split(" "), stdout=suprocess.PIPE, stderr=subprocess.PIPE) # capture_output=True)
                     end = time.time()
                 except FileNotFoundError:
                     sys.exit()
