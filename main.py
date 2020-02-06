@@ -40,13 +40,10 @@ all_benchmarks = benchmark_param_list.keys()
 all_flags = ["-a", "-b", "-t", "--graph"]
 new_dir = "results_{}".format(int(datetime.timestamp(datetime.now())))
 
-
 def main():
-    allocators = collect("allocator")
-    benchmarks = collect("benchmark")
+    allocators, benchmarks, num_threads = parse_args()
     gen_benchmarks_makefiles(allocators, benchmarks)
     os.system("cd benchmarks && make > /dev/null")
-    num_threads = int(collect("thread")[0])
     run_benchmarks(benchmarks, allocators, num_threads)
     os.system("cd benchmarks && make clean > /dev/null && rm Makefile*")
 
@@ -60,7 +57,6 @@ def get_benchmark_lang_flag(benchmark):
 
 
 def format_allocators_used(allocators):
-
     path_list = []
     array_path_list = []
     array_list = []
@@ -107,35 +103,39 @@ def gen_benchmarks_makefiles(allocators, benchmarks):
     os.chdir("..")
 
 
-def get_defaults(what):
-    if what == "allocator":
-        return all_allocators
-    if what == "benchmark":
-        return all_benchmarks
-    if what == "thread":
-        return [16]
+def parse_args():
+    def collect(what, i):
+        lst = []
+        while (i < len(sys.argv)) and (sys.argv[i] not in list(filter(lambda x: x != what, all_flags))):
+            lst.append(sys.argv[i])
+            i += 1
+        return lst, i
 
-
-def collect(what):
-    flag = "-"+what[0]
-    flags = list(filter(lambda x: x != flag, all_flags))
-
-    results = []
+    alloc, bench, threads = ([], )*3
+    i = 0
+    while i < len(sys.argv):
+        if sys.argv[i] == "-a":
+            assert(len(alloc) == 0)
+            alloc, i = collect("-a", i+1)
+        elif sys.argv[i] == "-b":
+            assert(len(bench) == 0)
+            bench, i = collect("-b", i+1)
+        elif sys.argv[i] == "-t":
+            assert(len(threads) == 0)
+            threads, i = collect("-t", i+1)
+            assert(len(threads) == 1)
+        else:
+            i += 1
+    alloc = all_allocators if len(alloc) == 0 else alloc
+    bench = all_benchmarks if len(bench) == 0 else bench
     try:
-        start = sys.argv.index(flag) + 1
-        for arg in sys.argv[start:]:
-            if arg in flags:
-                break
-            results.append(arg)        
-        if len(results) == 0:
-            raise ValueError()
+        threads = 16 if len(threads) == 0 else int(threads[0])
     except ValueError:
-        print("No {} chosen, running all {}s".format(what, what))
-        return get_defaults(what)
+        print("-t expects an integer")
+        sys.exit(2)
+    return alloc, bench, threads
 
-    return results
-
-
+    
 def run_benchmarks(benchmarks, allocators, num_threads):
     thread_list = list(range(1, num_threads+1))
 
@@ -157,7 +157,6 @@ def run_benchmarks(benchmarks, allocators, num_threads):
                 except FileNotFoundError:
                     sys.exit()
                 print(end-start)
-                #print((end-start)*10000)
                 results[allocator].append(end-start)
                 print("Thread {} over".format(n))
 #        if "--graph" in sys.argv:
