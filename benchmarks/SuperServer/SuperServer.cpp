@@ -250,6 +250,7 @@ int main(int argc __attribute__((unused)), char *argv[] __attribute__((unused)))
     delete [] thread_infos;
     printf("currentrss=%ldMiB\n", getrss()/1024);
     printf("maxrss=%ldMiB\n", maxrss/1024);
-	printf("Throughput = %ld allocations per second, %8ld ... %8ld\n", num_allocs/(time_spent/1000000ul), num_allocs, time_spent);
+	//printf("Throughput = %ld allocations per second, %8ld ... %8ld\n", num_allocs/(time_spent/1000000ul), num_allocs, time_spent);
+	printf("Throughput = %8ld\n", ((double)1000000ul)/time_spent);
     return 0;
 }

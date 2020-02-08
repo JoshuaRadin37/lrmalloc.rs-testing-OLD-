@@ -5,6 +5,7 @@ import sys
 import subprocess
 from datetime import datetime
 import time
+import re
 
 # Original Author : Shreif Abdallah
 #         University of Rochester
@@ -28,11 +29,11 @@ allocator_path_map = {
     "ralloc": "ralloc/target/release"
 }
 benchmark_param_list = {
-    "larson": " 10 7 8 1000 10000 1 {}",
-    "t-test1": " {} 2 10000 10000 400",
-    "t-test2": " {} 2 10000 10000 400",
-    "threadtest": " {} 1000 10000 0 8",
-    "shbench": " 1",
+    "larson": " 10 8 32 1000 50 11 {}",
+    "t-test1": " 10 {} 10000 10000 400",
+    "t-test2": " 10 {} 10000 10000 400",
+    "threadtest": " {} 50 30000 2 8",
+    "shbench": "",
     "SuperServer": ""
 }
 all_allocators = allocator_path_map.keys()
@@ -86,6 +87,7 @@ def gen_benchmarks_makefiles(allocators, benchmarks):
     with open("Makefile", "w") as f:
         f.write(template.format(" ".join(benchmarks)))
     os.chdir("..")
+    
     template = "" 
     with open("templates/makefile_template", "r") as f:
         template = f.read()
@@ -148,17 +150,18 @@ def run_benchmarks(benchmarks, allocators, num_threads):
             results[allocator] = []
 
             for n in thread_list:
-                print("Thread {} starting".format(n))
+                print("-------------- [START] {}-{} with {} threads --------------".format(benchmark, allocator, n))
                 cmd = "./{0}/{0}-{1} {2}".format(benchmark, allocator, benchmark_param_list[benchmark].format(num_threads))
-                start = time.time()
                 try:
-                    process = subprocess.run(cmd.split(" "), stdout=suprocess.PIPE, stderr=subprocess.PIPE) # capture_output=True)
+                    start = time.time()
+                    process = subprocess.run(cmd.split(" "), stdout=subprocess.PIPE, stderr=subprocess.PIPE) # capture_output=True)
                     end = time.time()
-                except FileNotFoundError:
+                    throughput = int(re.search("Throughput =\s*(\d)+").group(1)) if benchmark == "larson" else 1.0/(end-start)
+                except FileNotFoundError, AttributeError:
                     sys.exit()
-                print(end-start)
-                results[allocator].append(end-start)
-                print("Thread {} over".format(n))
+                print(throughput)
+                results[allocator].append(throughput)
+                print("-------------- [END] {}-{} with {} threads --------------".format(benchmark, allocator, n))
 #        if "--graph" in sys.argv:
         make_graph(benchmark, results, num_threads)
     os.chdir("..")
@@ -171,7 +174,7 @@ def make_graph(benchmark, results, num_threads):
     import matplotlib.pyplot as g
     
     g.xlabel("Number of Threads")
-    g.ylabel("Time/s")
+    g.ylabel("Throughput")
 
     thread_list = list(range(1, num_threads+1))
     for allocator, time_value in results.items():

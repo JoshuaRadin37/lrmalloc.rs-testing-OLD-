@@ -289,11 +289,11 @@ int main(int argc, char *argv[])
 #ifdef SYS_MULTI_THREAD
 			  " for %d threads"
 #endif
-			  ": %.2f (%.4f CPU)\nThroughput = %8ld allocations per second\n",
+			  ": %.2f (%.4f CPU)\n[1/t] Throughput = %8ld\n",
 #ifdef SYS_MULTI_THREAD
 			  uThreadCount,
 #endif
-			  elapsedTime, cpuTime, num_allocs/cpuTime);
+			  elapsedTime, cpuTime, 1.0/cpuTime);
 
 	if (fin != stdin)
 		fclose(fin);

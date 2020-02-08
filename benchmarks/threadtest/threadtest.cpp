@@ -145,7 +145,8 @@ int main (int argc, char * argv[])
   auto elapsed = duration_cast<duration<double>>(stop - start);
 
   cout << "Time elapsed = " << elapsed.count() << endl;
-  cout << "Throughput = " << nthreads*(1+objSize)/elapsed.count() << " allocations per second" << endl;
+  cout << "Throughput = " << 1.0/elapsed.count() << endl;
+  //cout << "Throughput = " << nthreads*(1+objSize)/elapsed.count() << " allocations per second" << endl;
   delete [] threads;
 
   return 0;
