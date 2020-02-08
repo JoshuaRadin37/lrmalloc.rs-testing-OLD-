@@ -44,9 +44,9 @@ new_dir = "results_{}".format(int(datetime.timestamp(datetime.now())))
 def main():
     allocators, benchmarks, num_threads = parse_args()
     gen_benchmarks_makefiles(allocators, benchmarks)
-    os.system("cd benchmarks && make > /dev/null")
+    os.system("cd benchmarks && make")
     run_benchmarks(benchmarks, allocators, num_threads)
-    os.system("cd benchmarks && make clean > /dev/null && rm Makefile*")
+    os.system("cd benchmarks && make clean && rm Makefile*")
 
 
 def get_benchmark_lang_flag(benchmark):
@@ -144,25 +144,25 @@ def run_benchmarks(benchmarks, allocators, num_threads):
     os.chdir("benchmarks")
     for benchmark in benchmarks:
         results = {}
-        print(benchmark)
+        os.chdir(benchmark)
         for allocator in allocators:
-            print(allocator)
             results[allocator] = []
-
             for n in thread_list:
                 print("-------------- [START] {}-{} with {} threads --------------".format(benchmark, allocator, n))
-                cmd = "./{0}/{0}-{1} {2}".format(benchmark, allocator, benchmark_param_list[benchmark].format(num_threads))
+                cmd = "./{}-{} {}".format(benchmark, allocator, benchmark_param_list[benchmark].format(num_threads))
                 try:
                     start = time.time()
                     process = subprocess.run(cmd.split(" "), stdout=subprocess.PIPE, stderr=subprocess.PIPE) # capture_output=True)
                     end = time.time()
-                    throughput = int(re.search("Throughput =\s*(\d)+").group(1)) if benchmark == "larson" else 1.0/(end-start)
-                except FileNotFoundError, AttributeError:
+                    throughput = (int(re.search("Throughput = (\d+)", process.stdout.decode("utf-8")).group(1)) \
+                            if benchmark == "larson" else 1.0)/(end-start)
+                except AttributeError:
+                    print("Error processing results")
                     sys.exit()
-                print(throughput)
                 results[allocator].append(throughput)
                 print("-------------- [END] {}-{} with {} threads --------------".format(benchmark, allocator, n))
 #        if "--graph" in sys.argv:
+        os.chdir("..")
         make_graph(benchmark, results, num_threads)
     os.chdir("..")
 

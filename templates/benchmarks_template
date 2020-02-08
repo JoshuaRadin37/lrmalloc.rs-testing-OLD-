@@ -2,10 +2,10 @@ BENCHMARKS = {}
 TARGET = all
 all:
 	for benchmark in $(BENCHMARKS); do \
-		cd $$benchmark && make > /dev/null && cd .. ; \
+		cd $$benchmark && make && cd .. ; \
 	done;
 
 clean:
 	for benchmark in $(BENCHMARKS); do \
-		cd $$benchmark && make clean > /dev/null && rm Makefile && cd .. ; \
+		cd $$benchmark && make clean && rm Makefile && cd .. ; \
 	done;

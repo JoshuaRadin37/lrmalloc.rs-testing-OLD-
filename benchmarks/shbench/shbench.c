@@ -289,7 +289,7 @@ int main(int argc, char *argv[])
 #ifdef SYS_MULTI_THREAD
 			  " for %d threads"
 #endif
-			  ": %.2f (%.4f CPU)\n[1/t] Throughput = %8ld\n",
+			  ": %.2f (%.4f CPU)\nThroughput = %ld\n",
 #ifdef SYS_MULTI_THREAD
 			  uThreadCount,
 #endif
