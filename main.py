@@ -29,10 +29,10 @@ allocator_path_map = {
     "ralloc": "ralloc/target/release"
 }
 benchmark_param_list = {
-    "larson": " 10 8 32 1000 50 11 {}",
-    "t-test1": " 10 {} 10000 10000 400",
-    "t-test2": " 10 {} 10000 10000 400",
-    "threadtest": " {} 50 30000 2 8",
+    "larson": "5 8 32 1000 50 11 {}",
+    "t-test1": "10 {} 10000 10000 400",
+    "t-test2": "10 {} 10000 10000 400",
+    "threadtest": "{} 50 30000 2 8",
     "shbench": "",
     "SuperServer": ""
 }
@@ -150,13 +150,17 @@ def run_benchmarks(benchmarks, allocators, num_threads):
             for n in thread_list:
                 print("-------------- [START] {}-{} with {} threads --------------".format(benchmark, allocator, n))
                 cmd = "./{}-{} {}".format(benchmark, allocator, benchmark_param_list[benchmark].format(num_threads))
+                print(cmd)
                 try:
                     start = time.time()
                     process = subprocess.run(cmd.split(" "), stdout=subprocess.PIPE, stderr=subprocess.PIPE) # capture_output=True)
                     end = time.time()
-                    throughput = (int(re.search("Throughput = (\d+)", process.stdout.decode("utf-8")).group(1)) \
+                    print(process.stdout)
+                    print(process.stderr)
+                    throughput = (int(re.search("Throughput\s*=\s*(\d+)", process.stdout.decode("utf-8")).group(1)) \
                             if benchmark == "larson" else 1.0)/(end-start)
-                except AttributeError:
+                except AttributeError as e:
+                    print(e)
                     print("Error processing results")
                     sys.exit()
                 results[allocator].append(throughput)

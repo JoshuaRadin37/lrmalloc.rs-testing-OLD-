@@ -516,8 +516,7 @@ void runthreads(long sleep_cnt, int min_threads, int max_threads, int chperthrea
       // used_space = CountReservedSpace() - init_space;
       used_space = 0;
       
-      //printf ("[Ratio] Throughput = %8.0f operations per second.\n", sum_allocs / duration);
-      printf("Throughput = %ld operations per second.\n", sum_allocs);
+      printf ("Throughput = %8.0f operations per second.\n", sum_allocs / duration);
 
 #if 0
       printf("%2d ", num_threads ) ;
