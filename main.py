@@ -24,7 +24,7 @@ allocator_path_map = {
     "hoard": "Hoard/src",
     "jemalloc": "jemalloc/lib",
     "tcmalloc": "gperftools/lib",
-    "ptmalloc3": "ptmalloc3",
+    #"ptmalloc3": "ptmalloc3",
     "supermalloc": "SuperMalloc/release/lib",
     "ralloc": "ralloc/target/release"
 }
@@ -151,19 +151,22 @@ def run_benchmarks(benchmarks, allocators, num_threads):
                 print("-------------- [START] {}-{} with {} threads --------------".format(benchmark, allocator, n))
                 cmd = "./{}-{} {}".format(benchmark, allocator, benchmark_param_list[benchmark].format(num_threads))
                 print(cmd)
-                try:
-                    start = time.time()
-                    process = subprocess.run(cmd.split(" "), stdout=subprocess.PIPE, stderr=subprocess.PIPE) # capture_output=True)
-                    end = time.time()
-                    print(process.stdout)
-                    print(process.stderr)
-                    throughput = (int(re.search("Throughput\s*=\s*(\d+)", process.stdout.decode("utf-8")).group(1)) \
-                            if benchmark == "larson" else 1.0)/(end-start)
-                except AttributeError as e:
-                    print(e)
-                    print("Error processing results")
-                    sys.exit()
-                results[allocator].append(throughput)
+                throughputs = []
+                for i in range(3): # do an average over 3 measurements
+                    try:
+                        start = time.time()
+                        process = subprocess.run(cmd.split(" "), stdout=subprocess.PIPE, stderr=subprocess.PIPE) # capture_output=True)
+                        end = time.time()
+                        print(process.stdout)
+                        print(process.stderr)
+                        throughput = (int(re.search("Throughput\s*=\s*(\d+)", process.stdout.decode("utf-8")).group(1)) \
+                                if benchmark == "larson" else 1.0)/(end-start)
+                    except AttributeError as e:
+                        print(e)
+                        print("Error processing results")
+                        sys.exit()
+                    throughputs.append(throughput)
+                results[allocator].append(sum(throughputs)/len(throughputs))
                 print("-------------- [END] {}-{} with {} threads --------------".format(benchmark, allocator, n))
 #        if "--graph" in sys.argv:
         os.chdir("..")
@@ -188,6 +191,7 @@ def make_graph(benchmark, results, num_threads):
     g.title(benchmark)
     graph_name = "{}_{}.png".format(benchmark, new_dir.split("_")[1])
     g.savefig(graph_name)
+    g.close()
     os.rename(graph_name, "../graphs/{}".format(graph_name))
 
 if __name__ == "__main__":
