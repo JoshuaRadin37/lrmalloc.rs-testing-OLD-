@@ -51,3 +51,5 @@ benchmarks/threadtest/threadtest-ptmalloc3
 benchmarks/threadtest/threadtest-ralloc
 benchmarks/threadtest/threadtest-supermalloc
 benchmarks/threadtest/threadtest-tcmalloc
+benchmarks/larson/old.larson.cpp
+benchmarks/t-test1/t-test2-ptmalloc3
