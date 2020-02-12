@@ -49,12 +49,19 @@ def main():
     os.system("cd benchmarks && make clean && rm Makefile*")
 
 
+def is_threaded(benchmark):
+    if benchmark in ["larson", "threadtest", "t-test1", "t-test2"]:
+        return True
+    if benchmark in ["shbench", "SuperServer"]:
+        return False
+    raise ValueError # unreachable code?
+
 def get_benchmark_lang_flag(benchmark):
     if benchmark in ["shbench", "t-test1", "t-test2"]:
         return "CC"
     if benchmark in ["larson", "SuperServer", "threadtest"]:
         return "CXX"
-    raise ValueError
+    raise ValueError # unreachable code?
 
 
 def format_allocators_used(allocators):
@@ -140,38 +147,61 @@ def parse_args():
     
 def run_benchmarks(benchmarks, allocators, num_threads):
     thread_list = list(range(1, num_threads+1))
-
-    os.chdir("benchmarks")
+    os.chdir("graphs")
+    os.mkdir(new_dir)
+    os.chdir("../benchmarks")
     for benchmark in benchmarks:
         results = {}
+        text_name = "{}_{}.txt".format(benchmark, new_dir.split("_")[1])
+        outfile = open(text_name, "w")
         os.chdir(benchmark)
+        try:
+            threaded = is_threaded(benchmark)
+        except ValueError:
+            sys.exit(3)
+        bounds = thread_list if threaded else [1]
         for allocator in allocators:
             results[allocator] = []
-            for n in thread_list:
-                print("-------------- [START] {}-{} with {} threads --------------".format(benchmark, allocator, n))
-                cmd = "./{}-{} {}".format(benchmark, allocator, benchmark_param_list[benchmark].format(num_threads))
+            for n in bounds:
+                if threaded:
+                    outfile.write("-------------- [START] {}-{} with {} threads --------------\n".format(benchmark, allocator, n))
+                else:
+                    outfile.write("-------------- [START] {}-{} : single-threaded --------------\n".format(benchmark, allocator))
+                cmd = "./{}-{} {}".format(benchmark, allocator, benchmark_param_list[benchmark].format(n))
                 print(cmd)
                 throughputs = []
                 for i in range(3): # do an average over 3 measurements
                     try:
+                        outfile.write("---- Start Iteration {} ----".format(i+1))
                         start = time.time()
-                        process = subprocess.run(cmd.split(" "), stdout=subprocess.PIPE, stderr=subprocess.PIPE) # capture_output=True)
+                        process = subprocess.run(cmd.split(" "), stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
                         end = time.time()
-                        print(process.stdout)
-                        print(process.stderr)
+                        outfile.write(process.stdout.decode("utf-8")+"\n")
+                        # print(process.stdout)
+                        # print(process.stderr)
                         throughput = (int(re.search("Throughput\s*=\s*(\d+)", process.stdout.decode("utf-8")).group(1)) \
                                 if benchmark == "larson" else 1.0)/(end-start)
                     except AttributeError as e:
                         print(e)
                         print("Error processing results")
                         sys.exit()
+                    outfile.write("Throughput: {}\n".format(throughput))
+                    outfile.write("---- End  Iteration {} ----\n\n".format(i+1))
                     throughputs.append(throughput)
-                results[allocator].append(sum(throughputs)/len(throughputs))
-                print("-------------- [END] {}-{} with {} threads --------------".format(benchmark, allocator, n))
+                average = sum(throughputs)/len(throughputs)
+                outfile.write("#### Average Throughput: {} ####\n".format(average))
+                results[allocator].append(average)
+                if threaded:
+                    outfile.write("-------------- [END] {}-{} with {} threads --------------\n\n\n".format(benchmark, allocator, n))
+                else:
+                    outfile.write("-------------- [END] {}-{} : single-threaded --------------\n".format(benchmark, allocator))
 #        if "--graph" in sys.argv:
+        outfile.close()
         os.chdir("..")
+        os.rename(text_name, "../graphs/{}/{}".format(new_dir, text_name))
         make_graph(benchmark, results, num_threads)
     os.chdir("..")
+    print(new_dir)
 
 
 def make_graph(benchmark, results, num_threads):
@@ -180,19 +210,30 @@ def make_graph(benchmark, results, num_threads):
     matplotlib.use("Agg")
     import matplotlib.pyplot as g
     
-    g.xlabel("Number of Threads")
     g.ylabel("Throughput")
-
-    thread_list = list(range(1, num_threads+1))
-    for allocator, time_value in results.items():
-        g.plot(thread_list, time_value, label=allocator)
+    threaded = is_threaded(benchmark)
     
-    g.legend()
+    if threaded:
+        g.xlabel("Number of Threads")
+        thread_list = list(range(1, num_threads+1))
+        for allocator, time_value in results.items():
+            g.plot(thread_list, time_value, label=allocator)
+        g.legend()
+    else:
+        g.xlabel("Allocator")
+        x = range(len(results))
+        times, x_label = [], []
+        for allocator, time_value in results.items():
+            times.append(time_value[0])
+            x_label.append(allocator)
+        g.bar(x, times)
+        g.xticks(x, x_label)
+    
     g.title(benchmark)
     graph_name = "{}_{}.png".format(benchmark, new_dir.split("_")[1])
     g.savefig(graph_name)
     g.close()
-    os.rename(graph_name, "../graphs/{}".format(graph_name))
+    os.rename(graph_name, "../graphs/{}/{}".format(new_dir, graph_name))
 
 if __name__ == "__main__":
     main()
