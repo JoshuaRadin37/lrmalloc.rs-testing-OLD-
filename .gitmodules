@@ -10,3 +10,9 @@
 [submodule "allocators/SuperMalloc"]
 	path = allocators/SuperMalloc
 	url = https://github.com/kuszmaul/SuperMalloc.git
+[submodule "FlameGraph"]
+	path = FlameGraph
+	url = git@github.com:brendangregg/FlameGraph.git
+[submodule "rust-unmangle"]
+	path = rust-unmangle
+	url = git@github.com:Yamakaky/rust-unmangle.git

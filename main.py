@@ -34,7 +34,7 @@ benchmark_param_list = {
     "t-test2": "10 {} 10000 10000 400",
     "threadtest": "{} 50 30000 2 8",
     "shbench": "",
-    "SuperServer": ""
+    "SuperServer": "{} 20"
 }
 all_allocators = allocator_path_map.keys()
 all_benchmarks = benchmark_param_list.keys()
@@ -47,12 +47,12 @@ def main():
     os.system("cd benchmarks && make")
     run_benchmarks(benchmarks, allocators, num_threads)
     os.system("cd benchmarks && make clean && rm Makefile*")
-
+    os.system("echo \"Task {} ended\" | mail -s 'ralloc-benchmarking: task completed' mchavrim@u.rochester.edu".format(new_dir))
 
 def is_threaded(benchmark):
-    if benchmark in ["larson", "threadtest", "t-test1", "t-test2"]:
+    if benchmark in ["larson", "threadtest", "t-test1", "t-test2", "SuperServer"]:
         return True
-    if benchmark in ["shbench", "SuperServer"]:
+    if benchmark in ["shbench"]:
         return False
     raise ValueError # unreachable code?
 
@@ -176,9 +176,10 @@ def run_benchmarks(benchmarks, allocators, num_threads):
                         start = time.time()
                         process = subprocess.run(cmd.split(" "), stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
                         end = time.time()
-                        outfile.write(process.stdout.decode("utf-8")+"\n")
-                        # print(process.stdout)
-                        # print(process.stderr)
+                        output = process.stdout.decode("utf-8")
+                        outfile.write(output+"\n")
+                        # print(output)
+                        print(process.stderr)
                         throughput = (int(re.search("Throughput\s*=\s*(\d+)", process.stdout.decode("utf-8")).group(1)) \
                                 if benchmark == "larson" else 1.0)/(end-start)
                     except AttributeError as e:
@@ -211,14 +212,21 @@ def make_graph(benchmark, results, num_threads):
     import matplotlib.pyplot as g
     
     g.ylabel("Throughput")
+    g.title(benchmark)
+    graph_name = "{}_{}.png".format(benchmark, new_dir.split("_")[1])
     threaded = is_threaded(benchmark)
     
     if threaded:
         g.xlabel("Number of Threads")
         thread_list = list(range(1, num_threads+1))
+        fig = g.figure(1)
+        sp = fig.add_subplot(111)
         for allocator, time_value in results.items():
-            g.plot(thread_list, time_value, label=allocator)
-        g.legend()
+            sp.plot(thread_list, time_value, label=allocator)
+        lgd = sp.legend(bbox_to_anchor=(1.04,1), loc='upper left', ncol = 1)
+        #text = g.text(-0.2,1.05, "", transform=g.transAxes)
+        #g.savefig(graph_name, bbox_extra_artists=(lgd,text), bbox_inches='tight')
+        fig.savefig(graph_name, bbox_extra_artists=(lgd,), bbox_inches='tight')
     else:
         g.xlabel("Allocator")
         x = range(len(results))
@@ -228,10 +236,7 @@ def make_graph(benchmark, results, num_threads):
             x_label.append(allocator)
         g.bar(x, times)
         g.xticks(x, x_label)
-    
-    g.title(benchmark)
-    graph_name = "{}_{}.png".format(benchmark, new_dir.split("_")[1])
-    g.savefig(graph_name)
+        g.savefig(graph_name)
     g.close()
     os.rename(graph_name, "../graphs/{}/{}".format(new_dir, graph_name))
 

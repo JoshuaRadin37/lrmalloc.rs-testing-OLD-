@@ -212,11 +212,19 @@ static void run_malloc_run(thread_info *ti) {
 	   biggest_a_time, biggest_d_time);
 }
 
-int main(int argc __attribute__((unused)), char *argv[] __attribute__((unused))) {
+int main(int argc, char *argv[]) {
+
     printf("currentrss=%ld\n", getrss());
     memory_per_thread = memory_total/n_threads;
     thread_infos = new thread_info[n_threads];
     threads      = new std::thread[n_threads];
+
+	if (argc > 1) {
+		n_threads = atoi(argv[1]);
+	}
+	if (argc > 2) {
+		n_mallocs = atol(argv[2]);
+	}
 
     set_stop_flag(false);
     for (int i = 0; i < n_threads; i++) {
