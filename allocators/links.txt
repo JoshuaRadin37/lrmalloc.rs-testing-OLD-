@@ -1,0 +1,6 @@
+https://github.com/emeryberger/Hoard
+https://github.com/jemalloc/jemalloc
+https://github.com/JoshuaRadin37/lrmalloc.rs
+https://github.com/kuszmaul/SuperMalloc
+https://github.com/google/tcmalloc
+http://www.malloc.de/malloc/ptmalloc3.tar.gz

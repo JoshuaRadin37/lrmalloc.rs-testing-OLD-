@@ -4,10 +4,6 @@ graphs/
 .idea/
 .idea/vcs.xml
 .idea/benchmarking.iml
-allocators/Hoard
-allocators/SuperMalloc
-allocators/gperftools
-allocators/ralloc
 benchmarks/Makefile
 benchmarks/Makefile.inc
 benchmarks/SuperServer/Makefile

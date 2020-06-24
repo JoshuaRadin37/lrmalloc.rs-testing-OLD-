@@ -16,3 +16,9 @@
 [submodule "rust-unmangle"]
 	path = rust-unmangle
 	url = git@github.com:Yamakaky/rust-unmangle.git
+[submodule "allocators/lrmalloc.rs"]
+	path = allocators/lrmalloc.rs
+	url = https://github.com/JoshuaRadin37/lrmalloc.rs.git
+[submodule "allocators/tcmalloc"]
+	path = allocators/tcmalloc
+	url = https://github.com/google/tcmalloc.git

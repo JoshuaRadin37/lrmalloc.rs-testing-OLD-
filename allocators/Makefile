@@ -1,6 +1,5 @@
-TARGET =  build-Hoard build-ptmalloc build-jemalloc build-SuperMalloc build-ralloc
-CLEANERS =  clean-Hoard clean-ptmalloc clean-jemalloc clean-SuperMalloc clean-ralloc
-
+TARGET = build-Hoard build-ptmalloc build-jemalloc build-SuperMalloc build-lrmalloc_rs_global
+CLEANERS = clean-Hoard clean-ptmalloc clean-jemalloc clean-SuperMalloc clean-lrmalloc_rs_global
 
 all:
 	make $(TARGET)
@@ -20,7 +19,10 @@ build-ptmalloc:
 build-SuperMalloc:
 	cd SuperMalloc && make && cd ..
 
-build-ralloc:
+# build-ralloc:
+#	 cd ralloc && make && cd ..
+
+build-lrmalloc_rs_global:
 	cd lrmalloc.rs/lrmalloc-rs-global && cargo build && cd ..
 
 clean:
@@ -42,5 +44,9 @@ clean-SuperMalloc:
 	cd SuperMalloc && make clean && cd ..
 
 clean-ralloc:
+	cd ralloc && make && cd ..
+
+clean-lrmalloc_rs_global:
 	cd lrmalloc.rs/lrmalloc-rs-global && cargo clean && cd ..
+
 
