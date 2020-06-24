@@ -7,10 +7,6 @@ from datetime import datetime
 import time
 import re
 
-# Original Author : Shreif Abdallah
-#         University of Rochester
-#         Class of 2021
-
 """
 Forked by:  Michael Chavrimootoo
             University of Rochester
@@ -24,9 +20,10 @@ allocator_path_map = {
     "hoard": "Hoard/src",
     "jemalloc": "jemalloc/lib",
     "tcmalloc": "gperftools/lib",
-    #"ptmalloc3": "ptmalloc3",
+    # "ptmalloc3": "ptmalloc3",
     "supermalloc": "SuperMalloc/release/lib",
-    "ralloc": "ralloc/target/release"
+    # "ralloc": "ralloc/target/release"
+    "lrmalloc_rs_global": "lrmalloc.rs/target/debug"
 }
 benchmark_param_list = {
     "larson": "5 8 32 1000 50 11 {}",
@@ -41,6 +38,7 @@ all_benchmarks = benchmark_param_list.keys()
 all_flags = ["-a", "-b", "-t", "--graph"]
 new_dir = "results_{}".format(int(datetime.timestamp(datetime.now())))
 
+
 def main():
     allocators, benchmarks, num_threads = parse_args()
     gen_benchmarks_makefiles(allocators, benchmarks)
@@ -49,12 +47,14 @@ def main():
     os.system("cd benchmarks && make clean && rm Makefile*")
     os.system("echo \"Task {} ended\" | mail -s 'ralloc-benchmarking: task completed' mchavrim@u.rochester.edu".format(new_dir))
 
+
 def is_threaded(benchmark):
     if benchmark in ["larson", "threadtest", "t-test1", "t-test2", "SuperServer"]:
         return True
     if benchmark in ["shbench"]:
         return False
     raise ValueError # unreachable code?
+
 
 def get_benchmark_lang_flag(benchmark):
     if benchmark in ["shbench", "t-test1", "t-test2"]:
@@ -163,16 +163,15 @@ def run_benchmarks(benchmarks, allocators, num_threads):
         for allocator in allocators:
             results[allocator] = []
             for n in bounds:
-                if threaded:
-                    outfile.write("-------------- [START] {}-{} with {} threads --------------\n".format(benchmark, allocator, n))
-                else:
-                    outfile.write("-------------- [START] {}-{} : single-threaded --------------\n".format(benchmark, allocator))
+                start_line = "-------------- [START] {}-{} with {} thread{} --------------\n"\
+                    .format(benchmark, allocator, *((n, "s") if threaded else (1, "")))
+                outfile.write(start_line)
                 cmd = "./{}-{} {}".format(benchmark, allocator, benchmark_param_list[benchmark].format(n))
                 print(cmd)
                 throughputs = []
-                for i in range(3): # do an average over 3 measurements
+                for i in range(3):  # do an average over 3 measurements
                     try:
-                        outfile.write("---- Start Iteration {} ----".format(i+1))
+                        outfile.write("---- ))Start Iteration {} ----".format(i+1))
                         start = time.time()
                         process = subprocess.run(cmd.split(" "), stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
                         end = time.time()
@@ -180,8 +179,9 @@ def run_benchmarks(benchmarks, allocators, num_threads):
                         outfile.write(output+"\n")
                         # print(output)
                         print(process.stderr)
-                        throughput = (int(re.search("Throughput\s*=\s*(\d+)", process.stdout.decode("utf-8")).group(1)) \
-                                if benchmark == "larson" else 1.0)/(end-start)
+                        throughput = int(re.search("Throughput\s*=\s*(\d+)", process.stdout.decode("utf-8")).group(1)) \
+                            if benchmark == "larson"  else 1.0
+                        throughput = throughput/(end-start)
                     except AttributeError as e:
                         print(e)
                         print("Error processing results")
@@ -192,10 +192,9 @@ def run_benchmarks(benchmarks, allocators, num_threads):
                 average = sum(throughputs)/len(throughputs)
                 outfile.write("#### Average Throughput: {} ####\n".format(average))
                 results[allocator].append(average)
-                if threaded:
-                    outfile.write("-------------- [END] {}-{} with {} threads --------------\n\n\n".format(benchmark, allocator, n))
-                else:
-                    outfile.write("-------------- [END] {}-{} : single-threaded --------------\n".format(benchmark, allocator))
+                end_line = "-------------- [END] {}-{} with {} thread{} --------------\n" \
+                    .format(benchmark, allocator, *((n, "s") if threaded else (1, "")))
+                outfile.write(end_line)
 #        if "--graph" in sys.argv:
         outfile.close()
         os.chdir("..")
@@ -223,9 +222,9 @@ def make_graph(benchmark, results, num_threads):
         sp = fig.add_subplot(111)
         for allocator, time_value in results.items():
             sp.plot(thread_list, time_value, label=allocator)
-        lgd = sp.legend(bbox_to_anchor=(1.04,1), loc='upper left', ncol = 1)
-        #text = g.text(-0.2,1.05, "", transform=g.transAxes)
-        #g.savefig(graph_name, bbox_extra_artists=(lgd,text), bbox_inches='tight')
+        lgd = sp.legend(bbox_to_anchor=(1.04, 1), loc='upper left', ncol=1)
+        # text = g.text(-0.2,1.05, "", transform=g.transAxes)
+        # g.savefig(graph_name, bbox_extra_artists=(lgd,text), bbox_inches='tight')
         fig.savefig(graph_name, bbox_extra_artists=(lgd,), bbox_inches='tight')
     else:
         g.xlabel("Allocator")
@@ -239,6 +238,7 @@ def make_graph(benchmark, results, num_threads):
         g.savefig(graph_name)
     g.close()
     os.rename(graph_name, "../graphs/{}/{}".format(new_dir, graph_name))
+
 
 if __name__ == "__main__":
     main()

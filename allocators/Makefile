@@ -2,8 +2,8 @@ TARGET =  build-Hoard build-ptmalloc build-jemalloc build-SuperMalloc build-rall
 CLEANERS =  clean-Hoard clean-ptmalloc clean-jemalloc clean-SuperMalloc clean-ralloc
 
 
-#all:
-#	make $(TARGET)
+all:
+	make $(TARGET)
 
 # build-tcmalloc:
 # 	cd gperftools && ./configure && make
@@ -21,7 +21,7 @@ build-SuperMalloc:
 	cd SuperMalloc && make && cd ..
 
 build-ralloc:
-	cd ralloc && make && cd ..
+	cd lrmalloc.rs/lrmalloc-rs-global && cargo build && cd ..
 
 clean:
 	make $(CLEANERS)
@@ -42,5 +42,5 @@ clean-SuperMalloc:
 	cd SuperMalloc && make clean && cd ..
 
 clean-ralloc:
-	cd ralloc && make clean && cd ..
+	cd lrmalloc.rs/lrmalloc-rs-global && cargo clean && cd ..
 

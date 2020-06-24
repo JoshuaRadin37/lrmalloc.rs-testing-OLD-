@@ -1,7 +1,9 @@
+venv/
 results_*/
 graphs/
 .idea/
 .idea/vcs.xml
+.idea/benchmarking.iml
 allocators/Hoard
 allocators/SuperMalloc
 allocators/gperftools
