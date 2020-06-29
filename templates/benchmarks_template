@@ -1,11 +1,13 @@
 BENCHMARKS = {} 
 TARGET = all
 all:
+	pre=$$PWD; \
 	for benchmark in $(BENCHMARKS); do \
-		cd $$benchmark && make && cd .. ; \
+		cd $$pre && cd $$benchmark && make; \
 	done;
 
 clean:
+	pre=$$PWD; \
 	for benchmark in $(BENCHMARKS); do \
-		cd $$benchmark && make clean && rm Makefile && cd .. ; \
+		cd $$pre && cd $$benchmark && make clean && rm Makefile; \
 	done;

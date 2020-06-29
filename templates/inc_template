@@ -15,7 +15,11 @@ create_make = \
 	declare -A PATHS=($(ALLOCNAMES)); \
 	for name in $${{!PATHS[@]}}; do \
 		path=$${{PATHS[$$name]}}; \
-		echo $$path; \
-		$($(1)) -g -O3 -DNDEBUG -I/common $(2).$($(1)EXT) -L$$path -Wl,-rpath=$$path -l$$name -o $(2)-$$name -lpthread; \
+		if [[ $$name == "tcmalloc" ]]; then \
+		    libtool --mode=link --tag=$(1) $($(1)) -g -O3 -DNDEBUG -I/common $(2).$($(1)EXT) -o $(2)-$$name -lpthread $$path/libtcmalloc.la; \
+		elif [[ $$name == "libc" ]]; then \
+		    $($(1)) -g -O3 -DNDEBUG -I/common $(2).$($(1)EXT) -o $(2)-$$name -lpthread ;\
+		else \
+		    $($(1)) -g -O3 -DNDEBUG -I/common $(2).$($(1)EXT) -L$$path -Wl,-rpath=$$path -l$$name -o $(2)-$$name -lpthread ;\
+		fi; \
 	done;
-

@@ -8,22 +8,20 @@ import time
 import re
 
 """
-Forked by:  Michael Chavrimootoo
-            University of Rochester
-            01/17/2020
-
-Maintained by:  Michael Chavrimootoo
-                University of Rochester
+Forked and Maintained by:  Michael Chavrimootoo
+                           University of Rochester
+                           01/17/2020
 """
 
 allocator_path_map = {
     "hoard": "Hoard/src",
     "jemalloc": "jemalloc/lib",
-    "tcmalloc": "gperftools/lib",
-    # "ptmalloc3": "ptmalloc3",
-    "supermalloc": "SuperMalloc/release/lib",
+    "tcmalloc": "gperftools",
+    "supermalloc": "SuperMalloc/release/lib",  # uses transactional memory
+    "libc": "",  # instead of ptmalloc3
     # "ralloc": "ralloc/target/release"
-    "lrmalloc_rs_global": "lrmalloc.rs/target/debug"
+    "lrmalloc_rs_global": "lrmalloc.rs/target/release",
+    "lrmalloc_rs_global_no_apf": "lrmalloc.rs.noapf/target/release"
 }
 benchmark_param_list = {
     "larson": "5 8 32 1000 50 11 {}",
@@ -49,19 +47,13 @@ def main():
 
 
 def is_threaded(benchmark):
-    if benchmark in ["larson", "threadtest", "t-test1", "t-test2", "SuperServer"]:
-        return True
-    if benchmark in ["shbench"]:
-        return False
-    raise ValueError # unreachable code?
+    return benchmark != "shbench" # everything else is multi-threaded
 
 
 def get_benchmark_lang_flag(benchmark):
     if benchmark in ["shbench", "t-test1", "t-test2"]:
         return "CC"
-    if benchmark in ["larson", "SuperServer", "threadtest"]:
-        return "CXX"
-    raise ValueError # unreachable code?
+    return "CXX" # if benchmark in ["larson", "SuperServer", "threadtest"]
 
 
 def format_allocators_used(allocators):
@@ -102,10 +94,7 @@ def gen_benchmarks_makefiles(allocators, benchmarks):
     os.chdir("benchmarks")
     for benchmark in benchmarks:
         os.chdir(benchmark)
-        try:
-            lang_flag = get_benchmark_lang_flag(benchmark)
-        except ValueError:
-            sys.exit(3)
+        lang_flag = get_benchmark_lang_flag(benchmark)
         with open("Makefile", "w") as f:
             f.write(template.format(lang_flag, benchmark))
         os.chdir("..")
@@ -146,7 +135,6 @@ def parse_args():
 
     
 def run_benchmarks(benchmarks, allocators, num_threads):
-    thread_list = list(range(1, num_threads+1))
     os.chdir("graphs")
     os.mkdir(new_dir)
     os.chdir("../benchmarks")
@@ -155,21 +143,19 @@ def run_benchmarks(benchmarks, allocators, num_threads):
         text_name = "{}_{}.txt".format(benchmark, new_dir.split("_")[1])
         outfile = open(text_name, "w")
         os.chdir(benchmark)
-        try:
-            threaded = is_threaded(benchmark)
-        except ValueError:
-            sys.exit(3)
-        bounds = thread_list if threaded else [1]
+        threaded = is_threaded(benchmark)
+        bounds = range(1, num_threads+1) if threaded else range(1, 2)
         for allocator in allocators:
             results[allocator] = []
             for n in bounds:
                 start_line = "-------------- [START] {}-{} with {} thread{} --------------\n"\
-                    .format(benchmark, allocator, *((n, "s") if threaded else (1, "")))
+                    .format(benchmark, allocator, n, "s" if threaded else "")
                 outfile.write(start_line)
                 cmd = "./{}-{} {}".format(benchmark, allocator, benchmark_param_list[benchmark].format(n))
                 print(cmd)
-                throughputs = []
-                for i in range(3):  # do an average over 3 measurements
+                sum_throughput = 0.0
+                num_trials = 3
+                for i in range(num_trials):  # do an average over 3 measurements
                     try:
                         outfile.write("---- ))Start Iteration {} ----".format(i+1))
                         start = time.time()
@@ -177,10 +163,8 @@ def run_benchmarks(benchmarks, allocators, num_threads):
                         end = time.time()
                         output = process.stdout.decode("utf-8")
                         outfile.write(output+"\n")
-                        # print(output)
-                        print(process.stderr)
                         throughput = int(re.search("Throughput\s*=\s*(\d+)", process.stdout.decode("utf-8")).group(1)) \
-                            if benchmark == "larson"  else 1.0
+                            if benchmark == "larson" else 1.0
                         throughput = throughput/(end-start)
                     except AttributeError as e:
                         print(e)
@@ -188,13 +172,11 @@ def run_benchmarks(benchmarks, allocators, num_threads):
                         sys.exit()
                     outfile.write("Throughput: {}\n".format(throughput))
                     outfile.write("---- End  Iteration {} ----\n\n".format(i+1))
-                    throughputs.append(throughput)
-                average = sum(throughputs)/len(throughputs)
+                    sum_throughput += throughput
+                average = sum_throughput/num_trials
                 outfile.write("#### Average Throughput: {} ####\n".format(average))
                 results[allocator].append(average)
-                end_line = "-------------- [END] {}-{} with {} thread{} --------------\n" \
-                    .format(benchmark, allocator, *((n, "s") if threaded else (1, "")))
-                outfile.write(end_line)
+                outfile.write("-------------- [END] --------------\n")
 #        if "--graph" in sys.argv:
         outfile.close()
         os.chdir("..")
@@ -221,7 +203,7 @@ def make_graph(benchmark, results, num_threads):
         fig = g.figure(1)
         sp = fig.add_subplot(111)
         for allocator, time_value in results.items():
-            sp.plot(thread_list, time_value, label=allocator)
+            sp.plot(thread_list, time_value, label=allocator) # this might break in the future
         lgd = sp.legend(bbox_to_anchor=(1.04, 1), loc='upper left', ncol=1)
         # text = g.text(-0.2,1.05, "", transform=g.transAxes)
         # g.savefig(graph_name, bbox_extra_artists=(lgd,text), bbox_inches='tight')

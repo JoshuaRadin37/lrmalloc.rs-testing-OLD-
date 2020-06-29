@@ -1,2 +1,0 @@
--------------- [START] t-test1-hoard with 1 threads --------------
----- Start Iteration 1 ----

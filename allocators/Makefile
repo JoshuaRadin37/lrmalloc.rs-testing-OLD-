@@ -1,52 +1,56 @@
-TARGET = build-Hoard build-ptmalloc build-jemalloc build-SuperMalloc build-lrmalloc_rs_global
-CLEANERS = clean-Hoard clean-ptmalloc clean-jemalloc clean-SuperMalloc clean-lrmalloc_rs_global
+TARGET = build-Hoard build-ptmalloc build-jemalloc build-SuperMalloc build-lrmalloc_rs_global build-lrmalloc_rs_global_noapf
+CLEANERS = clean-Hoard clean-ptmalloc clean-jemalloc clean-SuperMalloc clean-lrmalloc_rs_global clean-lrmalloc_rs_global_noapf
 
 all:
 	make $(TARGET)
 
 # build-tcmalloc:
-# 	cd gperftools && ./configure && make
+# 	cd tcmalloc/tcmalloc && ./configure && make
+
+build-tcmalloc:
+	cd gperftools && ./autogen.sh && ./configure && make && cd ..
 
 build-Hoard:
-	cd Hoard/src && make && cd ..
+	cd Hoard/src && make && cd ../..
 
 build-jemalloc:
 	cd jemalloc && ./autogen.sh && make && cd ..
 
-build-ptmalloc:
-	cd ptmalloc3 && make && cd ..
-
+# SuperMalloc requires editing or release/Makefile
 build-SuperMalloc:
-	cd SuperMalloc && make && cd ..
+	cd SuperMalloc/release && make && cd ../..
 
 # build-ralloc:
 #	 cd ralloc && make && cd ..
 
 build-lrmalloc_rs_global:
-	cd lrmalloc.rs/lrmalloc-rs-global && cargo build && cd ..
+	cd lrmalloc.rs/lrmalloc-rs-global && cargo build && cd ../..
+
+build-lrmalloc_rs_global_noapf:
+	cd lrmalloc.rs.noapf/lrmalloc-rs-global && cargo build && cd ../..
 
 clean:
 	make $(CLEANERS)
 
-# clean-tcmalloc:
-# 	cd gperftools && make clean && make distclean
+clean-tcmalloc:
+	cd gperftools && make clean && make distclean && cd ..
 
 clean-Hoard:
-	cd Hoard/src && make clean && cd ..
+	cd Hoard/src && make clean && cd ../..
 
 clean-jemalloc:
 	cd jemalloc && make clean && cd ..
 
-clean-ptmalloc:
-	cd ptmalloc3 && make clean && cd ..
-
 clean-SuperMalloc:
 	cd SuperMalloc && make clean && cd ..
 
-clean-ralloc:
-	cd ralloc && make && cd ..
+#clean-ralloc:
+#	cd ralloc && make && cd ..
 
 clean-lrmalloc_rs_global:
-	cd lrmalloc.rs/lrmalloc-rs-global && cargo clean && cd ..
+	cd lrmalloc.rs/lrmalloc-rs-global && cargo clean && cd ../..
+
+clean-lrmalloc_rs_global_noapf:
+	cd lrmalloc.rs.noapf/lrmalloc-rs-global && cargo clean && cd ../..
 
 
