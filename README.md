@@ -13,15 +13,18 @@ There are currently four command line flags:
 -b <benchmark name>
 
 -t <number of threads>
+
+-c [all|alloc|bench|none]
 ````
 
-Allocator options: `tcmalloc`, `jemalloc`, `ptmalloc`, `Hoard`, `SuperMalloc`, `ralloc`
+Graphs are automatically generated
+
+Allocator options: `tcmalloc`, `jemalloc`, `libc`, `Hoard`, `SuperMalloc`, `ralloc`
 
 Benchmark options: `t-test1`, `t-test2`, `larson`, `threadtest`, `SuperServer`, `shbench`
 
-# To Build
+# To Run
 ````
-cd benchmarks
-make
+For `-c`, independent of the choice, the benchmarks will still run. If you just want to compile things, go to the corresponding \
+folder and use the Makefile in there.
 ````
-This will make all the test executables, you can run these individually or use `main.py`.

@@ -10,7 +10,7 @@ all:
 build-tcmalloc:
 	cd gperftools && ./autogen.sh && ./configure && make && cd ..
 
-build-Hoard:
+build-hoard:
 	cd Hoard/src && make && cd ../..
 
 build-jemalloc:
@@ -24,10 +24,14 @@ build-SuperMalloc:
 #	 cd ralloc && make && cd ..
 
 build-lrmalloc_rs_global:
-	cd lrmalloc.rs/lrmalloc-rs-global && cargo build && cd ../..
+	cd lrmalloc.rs/ && sed -i '/static USE_APF: bool = false/c\static USE_APF: bool = true' src/lib.rs &&\
+	cd lrmalloc-rs-global &&  sed -i '/name = \"lrmalloc-rs-global-noapf"/c\name = \"lrmalloc-rs-global\"' Cargo.toml \
+	&& cargo build && cd ../..
 
 build-lrmalloc_rs_global_noapf:
-	cd lrmalloc.rs.noapf/lrmalloc-rs-global && cargo build && cd ../..
+	cd lrmalloc.rs/ && sed -i '/static USE_APF: bool = true/c\static USE_APF: bool = false' src/lib.rs &&\
+	cd lrmalloc-rs-global &&  sed -i '/name = \"lrmalloc-rs-global"/c\name = \"lrmalloc-rs-global-noapf\"' Cargo.toml \
+	&& cargo build && cd ../..
 
 clean:
 	make $(CLEANERS)
@@ -50,7 +54,6 @@ clean-SuperMalloc:
 clean-lrmalloc_rs_global:
 	cd lrmalloc.rs/lrmalloc-rs-global && cargo clean && cd ../..
 
-clean-lrmalloc_rs_global_noapf:
-	cd lrmalloc.rs.noapf/lrmalloc-rs-global && cargo clean && cd ../..
 
-
+# sed -i '/name = \"lrmalloc-rs-global-noapf"/c\name = \"lrmalloc-rs-global\"' Cargo.toml
+# sed -i '/static USE_APF: bool = true;/c\static USE_APF: bool = false;' lib.rs

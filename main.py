@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import os
-import sys
+from sys import argv, exit
 import subprocess
 from datetime import datetime
 import time
@@ -19,7 +19,6 @@ allocator_path_map = {
     "tcmalloc": "gperftools",
     "supermalloc": "SuperMalloc/release/lib",  # uses transactional memory
     "libc": "",  # instead of ptmalloc3
-    # "ralloc": "ralloc/target/release"
     "lrmalloc_rs_global": "lrmalloc.rs/target/release",
     "lrmalloc_rs_global_no_apf": "lrmalloc.rs.noapf/target/release"
 }
@@ -33,15 +32,18 @@ benchmark_param_list = {
 }
 all_allocators = allocator_path_map.keys()
 all_benchmarks = benchmark_param_list.keys()
-all_flags = ["-a", "-b", "-t", "--graph"]
+arg_flags = ["-a", "-b", "-t", "-c"]
 new_dir = "results_{}".format(int(datetime.timestamp(datetime.now())))
 
 
 def main():
-    allocators, benchmarks, num_threads = parse_args()
-    gen_benchmarks_makefiles(allocators, benchmarks)
-    os.system("cd benchmarks && make")
-    run_benchmarks(benchmarks, allocators, num_threads)
+    args = parse_args()
+    if args["-c"] in ["all", "alloc"]:
+        build_allocators(args["-a"])
+    if args["-c"] in ["all", "bench"]:
+        gen_benchmarks_makefiles(args["-a"], args["-b"])
+        os.system("cd benchmarks && make")
+    run_benchmarks(args)
     os.system("cd benchmarks && make clean && rm Makefile*")
     os.system("echo \"Task {} ended\" | mail -s 'ralloc-benchmarking: task completed' mchavrim@u.rochester.edu".format(new_dir))
 
@@ -56,7 +58,7 @@ def get_benchmark_lang_flag(benchmark):
     return "CXX" # if benchmark in ["larson", "SuperServer", "threadtest"]
 
 
-def format_allocators_used(allocators):
+def format_allocators_used(allocators): 
     path_list = []
     array_path_list = []
     array_list = []
@@ -66,6 +68,13 @@ def format_allocators_used(allocators):
         array_list.append("[\"{0}\"]='$({0}_path)'".format(allocator))
 
     return "\n".join(path_list), " ".join(array_path_list), " ".join(array_list)
+
+
+
+def build_allocators(allocators):
+    os.chdir("allocators")
+    for allocator in allocators:
+        os.system("make build-{}".format(allocator))
 
 
 def gen_benchmarks_makefiles(allocators, benchmarks):
@@ -101,51 +110,47 @@ def gen_benchmarks_makefiles(allocators, benchmarks):
     os.chdir("..")
 
 
-def parse_args():
-    def collect(what, i):
-        lst = []
-        while (i < len(sys.argv)) and (sys.argv[i] not in list(filter(lambda x: x != what, all_flags))):
-            lst.append(sys.argv[i])
-            i += 1
-        return lst, i
+def verify_arguments(arguments):
 
-    alloc, bench, threads = ([], )*3
-    i = 0
-    while i < len(sys.argv):
-        if sys.argv[i] == "-a":
-            assert(len(alloc) == 0)
-            alloc, i = collect("-a", i+1)
-        elif sys.argv[i] == "-b":
-            assert(len(bench) == 0)
-            bench, i = collect("-b", i+1)
-        elif sys.argv[i] == "-t":
-            assert(len(threads) == 0)
-            threads, i = collect("-t", i+1)
-            assert(len(threads) == 1)
-        else:
-            i += 1
-    alloc = all_allocators if len(alloc) == 0 else alloc
-    bench = all_benchmarks if len(bench) == 0 else bench
     try:
-        threads = 16 if len(threads) == 0 else int(threads[0])
+        arguments["-t"] = int(arguments["-t"][0])
     except ValueError:
         print("-t expects an integer")
-        sys.exit(2)
-    return alloc, bench, threads
+        exit(2)
+    if len(arguments["-c"]) != 1 or arguments["-c"][0] not in ["all", "alloc", "bench", "none"]:
+        print("-c expects `all`, `alloc`, `bench`, or `none`")
+        exit(2)
+
+
+def parse_args():
+    arguments = {"-a": all_allocators, "-b": all_benchmarks, "-t": [16], "-c": ["all"]}
+    for i, term in enumerate(argv):
+        if term in arg_flags:
+            j = i+1
+            arguments[term] = []
+            while j < len(argv) and argv[j] not in arg_flags:
+                arguments[term].append(argv[j])
+                j += 1
+            if len(arguments[term]) == 0:
+                print("`{}` requires an argument".format(term))
+                exit(2)
+    verify_arguments(arguments)
+    return arguments
 
     
-def run_benchmarks(benchmarks, allocators, num_threads):
+def run_benchmarks(args):
+    num_threads = args["-t"]
     os.chdir("graphs")
     os.mkdir(new_dir)
     os.chdir("../benchmarks")
-    for benchmark in benchmarks:
+    for benchmark in args["-b"]:
         results = {}
         text_name = "{}_{}.txt".format(benchmark, new_dir.split("_")[1])
         outfile = open(text_name, "w")
         os.chdir(benchmark)
         threaded = is_threaded(benchmark)
         bounds = range(1, num_threads+1) if threaded else range(1, 2)
-        for allocator in allocators:
+        for allocator in args["-a"]:
             results[allocator] = []
             for n in bounds:
                 start_line = "-------------- [START] {}-{} with {} thread{} --------------\n"\
@@ -162,6 +167,7 @@ def run_benchmarks(benchmarks, allocators, num_threads):
                         process = subprocess.run(cmd.split(" "), stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
                         end = time.time()
                         output = process.stdout.decode("utf-8")
+                        print(output)
                         outfile.write(output+"\n")
                         throughput = int(re.search("Throughput\s*=\s*(\d+)", process.stdout.decode("utf-8")).group(1)) \
                             if benchmark == "larson" else 1.0
@@ -169,7 +175,7 @@ def run_benchmarks(benchmarks, allocators, num_threads):
                     except AttributeError as e:
                         print(e)
                         print("Error processing results")
-                        sys.exit()
+                        exit()
                     outfile.write("Throughput: {}\n".format(throughput))
                     outfile.write("---- End  Iteration {} ----\n\n".format(i+1))
                     sum_throughput += throughput
@@ -177,7 +183,6 @@ def run_benchmarks(benchmarks, allocators, num_threads):
                 outfile.write("#### Average Throughput: {} ####\n".format(average))
                 results[allocator].append(average)
                 outfile.write("-------------- [END] --------------\n")
-#        if "--graph" in sys.argv:
         outfile.close()
         os.chdir("..")
         os.rename(text_name, "../graphs/{}/{}".format(new_dir, text_name))
@@ -224,3 +229,7 @@ def make_graph(benchmark, results, num_threads):
 
 if __name__ == "__main__":
     main()
+
+
+# sed -i '/name = \"lrmalloc-rs-global-noapf"/c\name = \"lrmalloc-rs-global\"' Cargo.toml
+# sed -i '/static USE_APF: bool = true;/c\static USE_APF: bool = false;' lib.rs
