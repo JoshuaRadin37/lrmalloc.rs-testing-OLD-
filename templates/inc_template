@@ -20,6 +20,6 @@ create_make = \
 		elif [[ $$name == "libc" ]]; then \
 		    $($(1)) -g -O3 -DNDEBUG -I/common $(2).$($(1)EXT) -o $(2)-$$name -lpthread ;\
 		else \
-		    $($(1)) -g -O3 -DNDEBUG -I/common $(2).$($(1)EXT) -L$$path -Wl,-rpath=$$path -l$$name -o $(2)-$$name -lpthread ;\
+		    $($(1)) -g -O3 -DNDEBUG -I/common $(2).$($(1)EXT) -L$$path -o $(2)-$$name -lpthread ;\
 		fi; \
 	done;
