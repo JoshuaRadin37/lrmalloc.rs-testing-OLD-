@@ -19,8 +19,8 @@ allocator_path_map = {
     "tcmalloc": "gperftools",
     "supermalloc": "SuperMalloc/release/lib",  # uses transactional memory
     "libc": "",  # instead of ptmalloc3
-    "lrmalloc-rs": "lrmalloc.rs/target/release",
-    "lrmalloc-rs_no_apf": "lrmalloc.rs.noapf/target/release"
+    "lrmalloc-rs-global": "lrmalloc.rs/target/release",
+    "lrmalloc-rs-global_no_apf": "lrmalloc.rs.noapf/target/release"
 }
 benchmark_param_list = {
     "larson": "5 8 32 1000 50 11 {}",
