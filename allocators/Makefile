@@ -23,7 +23,7 @@ build-SuperMalloc:
 # build-ralloc:
 #	 cd ralloc && make && cd ..
 
-Build-lrmalloc-rs-global:
+build-lrmalloc-rs-global:
 	cd lrmalloc.rs; sed 's/static USE_APF: bool = false/static USE_APF: bool = true/' ./src/lib.rs
 	cd lrmalloc.rs/lrmalloc-rs-global; sed 's/name = \"lrmalloc-rs-global_no_apf"/name = \"lrmalloc-rs-global\"/' Cargo.toml
 	cargo build --manifest-path=lrmalloc.rs/Cargo.toml 
