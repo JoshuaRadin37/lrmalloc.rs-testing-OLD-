@@ -19,8 +19,8 @@ allocator_path_map = {
     "tcmalloc": "gperftools",
     "supermalloc": "SuperMalloc/release/lib",  # uses transactional memory
     "libc": "",  # instead of ptmalloc3
-    "lrmalloc_rs_global": "lrmalloc.rs/target/release",
-    "lrmalloc_rs_global_no_apf": "lrmalloc.rs.noapf/target/release"
+    "lrmalloc-rs": "lrmalloc.rs/target/release",
+    "lrmalloc-rs_no_apf": "lrmalloc.rs.noapf/target/release"
 }
 benchmark_param_list = {
     "larson": "5 8 32 1000 50 11 {}",
@@ -38,14 +38,16 @@ new_dir = "results_{}".format(int(datetime.timestamp(datetime.now())))
 
 def main():
     args = parse_args()
-    if args["-c"] in ["all", "alloc"]:
+    if not os.path.exists('graphs'):
+        os.mkdir('graphs')
+    if args["-c"][0] in ["all", "alloc"]:
         build_allocators(args["-a"])
-    if args["-c"] in ["all", "bench"]:
+    if args["-c"][0] in ["all", "bench"]:
         gen_benchmarks_makefiles(args["-a"], args["-b"])
         os.system("cd benchmarks && make")
     run_benchmarks(args)
     os.system("cd benchmarks && make clean && rm Makefile*")
-    os.system("echo \"Task {} ended\" | mail -s 'ralloc-benchmarking: task completed' mchavrim@u.rochester.edu".format(new_dir))
+    # os.system("echo \"Task {} ended\" | mail -s 'ralloc-benchmarking: task completed' mchavrim@u.rochester.edu".format(new_dir))
 
 
 def is_threaded(benchmark):
@@ -75,6 +77,7 @@ def build_allocators(allocators):
     os.chdir("allocators")
     for allocator in allocators:
         os.system("make build-{}".format(allocator))
+    os.chdir("..")
 
 
 def gen_benchmarks_makefiles(allocators, benchmarks):
@@ -156,6 +159,7 @@ def run_benchmarks(args):
                 start_line = "-------------- [START] {}-{} with {} thread{} --------------\n"\
                     .format(benchmark, allocator, n, "s" if threaded else "")
                 outfile.write(start_line)
+                open("./{}-{}".format(benchmark, allocator), "w")
                 cmd = "./{}-{} {}".format(benchmark, allocator, benchmark_param_list[benchmark].format(n))
                 print(cmd)
                 sum_throughput = 0.0
