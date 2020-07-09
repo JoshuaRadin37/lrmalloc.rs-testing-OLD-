@@ -12,7 +12,7 @@ ALLOCPATHS = {1}
 ALLOCNAMES = {2}
 
 create_make = \
-	declare -A PATHS=($(ALLOCNAMES)); \
+	declare -a PATHS=($(ALLOCNAMES)); \
 	for name in $${{!PATHS[@]}}; do \
 		path=$${{PATHS[$$name]}}; \
 		if [[ $$name == "tcmalloc" ]]; then \

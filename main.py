@@ -44,7 +44,9 @@ def main():
         build_allocators(args["-a"])
     if args["-c"][0] in ["all", "bench"]:
         gen_benchmarks_makefiles(args["-a"], args["-b"])
-        os.system("cd benchmarks && make")
+        os.chdir("benchmarks")
+        os.system("make")
+        os.chdir("..")
     run_benchmarks(args)
     os.system("cd benchmarks && make clean && rm Makefile*")
     # os.system("echo \"Task {} ended\" | mail -s 'ralloc-benchmarking: task completed' mchavrim@u.rochester.edu".format(new_dir))
