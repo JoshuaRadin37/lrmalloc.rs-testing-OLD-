@@ -67,9 +67,9 @@ def format_allocators_used(allocators):
     array_path_list = []
     array_list = []
     for allocator in allocators:
-        path_list.append("{}_path := $(MEMPATH)/{}".format(allocator, allocator_path_map[allocator]))
-        array_path_list.append("$({}_path)".format(allocator))
-        array_list.append("[\"{0}\"]='$({0}_path)'".format(allocator))
+        path_list.append("{}_path := ${{MEMPATH}}/{}".format(allocator, allocator_path_map[allocator]))
+        array_path_list.append("${{{}_path}}".format(allocator))
+        array_list.append("{0}".format(allocator))
 
     return "\n".join(path_list), " ".join(array_path_list), " ".join(array_list)
 

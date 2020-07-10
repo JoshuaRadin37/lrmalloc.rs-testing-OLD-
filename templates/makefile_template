@@ -2,6 +2,7 @@ include ../Makefile.inc
 
 TARGET = build
 
+.PHONY: build
 build:
 	$(call create_make,{0},{1})
 
