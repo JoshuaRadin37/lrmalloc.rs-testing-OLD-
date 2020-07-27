@@ -83,7 +83,7 @@ def build_allocators(allocators):
 
 
 def gen_benchmarks_makefiles(allocators, benchmarks):
-    template = "" 
+    # template = ""
     with open("templates/inc_template", "r") as f:
         template = f.read()
     assert(template != "")

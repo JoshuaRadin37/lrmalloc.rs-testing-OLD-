@@ -274,11 +274,11 @@ int main (int argc, char *argv[])
   scanf ("%ld", &sleep_cnt);
 
   printf("chunk size (min,max): ") ;
-  scanf("%d %d", &min_size, &max_size ) ;
+  scanf("%d,%d", &min_size, &max_size ) ;
 #if defined(_MT) || defined(_REENTRANT)
   //#ifdef _MT
-  printf("threads (min, max):   ") ; 
-  scanf("%d %d", &min_threads, &max_threads) ;
+  printf("threads (min,max):   ") ;
+  scanf("%d,%d", &min_threads, &max_threads) ;
   printf("chunks/thread:  ") ; scanf("%d", &chperthread ) ;
   printf("no of rounds:   ") ; scanf("%d", &num_rounds ) ;
   num_chunks = max_threads*chperthread ;

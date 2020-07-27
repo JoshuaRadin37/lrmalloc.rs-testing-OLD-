@@ -7,7 +7,13 @@ all:
 # build-tcmalloc:
 # 	cd tcmalloc/tcmalloc && ./configure && make
 
-build-tcmalloc:
+
+
+.PHONY:
+build-tcmalloc: gperftools/libtcmalloc.la
+
+tcmalloc_targets = $(wildcard gperftools/*.cc gperftools/*h)
+gperftools/libtcmalloc.la: $(tcmalloc_targets)
 	cd gperftools && ./autogen.sh && ./configure && make && cd ..
 
 build-Hoard:
